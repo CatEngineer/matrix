@@ -1,27 +1,27 @@
+import Base from "./base.js";
 import type { CacheLayer } from "./cache/index.js";
 import type Client from "./client.js";
+import type Entity from "./entity.js";
 
-export default abstract class Manager<K, V> {
+export default abstract class Manager<K, V extends Entity<any>> extends Base {
     private _cache: CacheLayer<K, V> | undefined;
 
     constructor(
-        public readonly client: Client,
+        client: Client,
         protected readonly holds: string
-    ) {}
+    ) {
+        super(client);
+    }
 
     public async getCache(): Promise<CacheLayer<K, V>> {
         if (!this._cache)
-            this._cache = await this.cacheFactory.getCacheLayer<K, V>(
+            this._cache = await this.cacheFactory.getCacheLayer(
+                this,
                 this.holds,
             );
         return this._cache;
     }
 
-    protected get rest() {
-        return this.client.rest;
-    }
-
-    private get cacheFactory() {
-        return this.client.cacheFactory;
-    }
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    public abstract fromJSON(data: string): V;
 }

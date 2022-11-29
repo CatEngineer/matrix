@@ -1,29 +1,50 @@
-import Builder from "../core/builder.js";
+/* eslint-disable */
 import Entity from "../core/entity.js";
 import Manager from "../core/manager.js";
+import EventManager from "./events/events.js";
 import type { SyncData } from "./generated/matrix.js";
+import RoomMemberManager from "./rooms/member.js";
 
-
-type RawRoom = {
-    room_id: string;
+/** @internal */
+export type RoomConstructData = {
+    id: string;
 }
 
+/** @internal */
 export class Room extends Entity<RoomManager> {
-}
+    public readonly events: EventManager;
 
-class RoomBuilder extends Builder<RoomManager, RawRoom> {
-    public async build(from: RawRoom): Promise<Room> {
-        const entity = new Room(this.manager, from.room_id);
-        return entity;
+    public readonly members: RoomMemberManager;
+
+    private readonly data: RoomConstructData;
+
+    constructor(manager: RoomManager, data: RoomConstructData) {
+        super(manager, data.id);
+        this.events = new EventManager(this, `${this.id}-events`);
+        this.members = new RoomMemberManager(this, `${this.id}-members`);
+        this.data = data;
+    }
+
+    public toJSON() {
+        return this.data;
     }
 }
 
 export default class RoomManager extends Manager<string, Room> {
+    public async getRoom(id: string): Promise<Room> {
+        return new Room(this, { id });
+    }
+
     public async handleSync(data: SyncData): Promise<void> {
         await this.handleJoins(data);
         await this.handleKicks(data);
         await this.handleInvites(data);
         await this.handleKnocks(data);
+    }
+
+    public fromJSON(data: string): Room {
+        const from = JSON.parse(data);
+        return new Room(this, from)
     }
 
     private async handleJoins(data: SyncData): Promise<void> {

@@ -1,5 +1,8 @@
-export default abstract class AsyncCacheLayer<K, V> {
-    constructor(protected readonly holds: string) {}
+import type Entity from "../../entity.js";
+import type Manager from "../../manager.js";
+
+export default abstract class AsyncCacheLayer<K, V extends Entity<any>> {
+    constructor(protected readonly manager: Manager<K, V>, protected readonly holds: string) {}
     public abstract get(key: K): Promise<V | undefined>;
     public abstract set(key: K, value: V): Promise<void>;
     public abstract delete(key: K): Promise<void>;

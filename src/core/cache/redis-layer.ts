@@ -1,10 +1,15 @@
 import AsyncCacheLayer from "./types/async-cache-layer.js";
 import type { RedisClientType } from "redis";
+import type Entity from "../entity.js";
+import type Manager from "../manager.js";
 
-export default class RedisCacheLayer<K, V> extends AsyncCacheLayer<K, V> {
-    constructor(private readonly client: RedisClientType, holds: string) {
-        super(holds);
-    }
+/** @internal */
+export default class RedisCacheLayer<K, V extends Entity<any>> extends AsyncCacheLayer<K, V> {
+    constructor(
+        private readonly client: RedisClientType,
+        manager: Manager<K, V>,
+        holds: string,
+    ) { super(manager, holds); }
 
     public async get(key: K): Promise<V | undefined> {
         const value = await this.client.hGet(this.holds, this.getKey(key));
@@ -59,7 +64,7 @@ export default class RedisCacheLayer<K, V> extends AsyncCacheLayer<K, V> {
     public async [Symbol.iterator](): Promise<IterableIterator<[K, V]>> {
         const all = await this.client.hGetAll(this.holds);
         return Object.entries(all).map(
-            ([key, value]) => [key, value] as [K, V],
+            ([key, value]) => [JSON.parse(key),  this.manager.fromJSON(value)] as [K, V],
         )[Symbol.iterator]();
     }
 

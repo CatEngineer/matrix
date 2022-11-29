@@ -1,4 +1,5 @@
 import type Client from "../core/client.js";
+import Entity from "../core/entity.js";
 import Manager from "../core/manager.js";
 import type {
     SyncData,
@@ -7,45 +8,74 @@ import type {
 
 export type SyncOptions = SyncParameters & {
     pullTimeout?: number;
+};
+
+type SyncConstructData = {
+    batchId: string;
+};
+
+export class SyncEntity extends Entity<SyncManager> {
+    private readonly data: SyncConstructData;
+
+    constructor(manager: SyncManager, data: SyncConstructData) {
+        super(manager, data.batchId);
+        this.data = data;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    public toJSON(): SyncConstructData {
+        return this.data;
+    }
 }
 
-export default class SyncManager extends Manager<string, SyncData> {
-    private static get defaultPullTimeout() { return 10_000; }
+export default class SyncManager extends Manager<string, SyncEntity> {
+    private static get defaultPullTimeout() {
+        return 10_000;
+    }
 
     constructor(
         client: Client,
         holds: string,
-        protected readonly options: SyncOptions,
+        protected readonly options: SyncOptions
     ) {
         super(client, holds);
     }
 
     public sync(callback: (error?: Error, data?: SyncData) => void): void {
-        let nextBatch: string;
+        let since: string;
         let timeoutId: NodeJS.Timer;
         const sync = async () => {
             // NOTE(dylhack): implicit object destruction to respect the inital
             //                next_batch passed to the constructor options.
-            const options: SyncOptions = nextBatch
-                ? { ...this.options, since: nextBatch }
+            const options: SyncOptions = since
+                ? { ...this.options, since }
                 : this.options;
+            console.log(`Syncing since: ${since ?? "never"}`);
             try {
-                const resp = await this.rest.matrix.sync(this.options);
+                const resp = await this.rest.matrix.sync(options);
                 callback(undefined, resp.data);
-                nextBatch = resp.data.next_batch;
+                since = resp.data.next_batch;
             } catch (error: unknown) {
-                if (error instanceof Error)
-                    callback(error);
+                if (error instanceof Error) callback(error);
                 clearTimeout(timeoutId);
             }
-        }
+        };
 
-        sync().then(() => {
-            timeoutId = setInterval(sync,
-                this.options.pullTimeout ?? SyncManager.defaultPullTimeout,
-            );
-        }).catch(error => {
-            callback(error);
-        });
+        sync()
+            .then(() => {
+                timeoutId = setInterval(
+                    sync,
+                    this.options.pullTimeout ?? SyncManager.defaultPullTimeout
+                );
+            })
+            .catch((error) => {
+                callback(error);
+            });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    public fromJSON(data: string): SyncEntity {
+        const from = JSON.parse(data) as SyncConstructData;
+        return new SyncEntity(this, from);
     }
 }

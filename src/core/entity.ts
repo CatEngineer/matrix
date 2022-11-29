@@ -1,13 +1,15 @@
-import type Client from "./client.js";
+import Base from "./base.js";
 import type Manager from "./manager.js";
 
-export default class Entity<T extends Manager<any, any>> {
-    public readonly client: Client;
-
+export default abstract class Entity<T extends Manager<any, any>> extends Base {
     constructor(
         public readonly manager: T, 
         public readonly id: string,
     ) {
-        this.client = manager.client;
+        super(manager.client);
     }
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    public abstract toJSON(): any;
+
 }

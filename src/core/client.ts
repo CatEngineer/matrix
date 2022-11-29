@@ -2,27 +2,29 @@ import { EventEmitter } from "node:events";
 import AuthManager from "../cs-api/auth.js";
 import SyncManager from "../cs-api/sync.js";
 import type { SyncOptions } from "../cs-api/sync.js";
-import type {
-    ApiConfig,
-    SyncData,
-} from "../cs-api/generated/matrix.js";
+import type { ApiConfig, SyncData } from "../cs-api/generated/matrix.js";
 import { MxHttpClient } from "../cs-api/generated/matrix.js";
 import CacheFactory from "../core/cache/index.js";
 import type { CacheOptions } from "../core/cache/index.js";
 import RoomManager from "../cs-api/rooms.js";
-import EventManager from "../cs-api/events/events.js";
+import type LoggerFactory from "./log/index.js";
+import SimpleLoggerFactory from "./log/simple.js";
+import Util from "./util.js";
 
 export type ClientOptions = {
     homeserverUrl: string;
     sync?: SyncOptions;
     rest?: ApiConfig;
-    cache?: CacheOptions;
+    cache?: CacheFactory | CacheOptions;
 };
 
 /** @internal */
 type InternalOptions = {
     sync: SyncOptions;
     rest: ApiConfig<string>;
+    cacheFactory: CacheFactory;
+    loggerFactory: LoggerFactory;
+    util: Util;
 };
 
 // NOTE(dylhack): Replace EventEmitter with EventTarget once it stabalizes
@@ -44,42 +46,19 @@ export default class Client extends EventEmitter {
 
     public readonly rooms: RoomManager;
 
-    public readonly events: EventManager;
-
     public readonly options: InternalOptions;
 
-    /** @internal */
-    public readonly cacheFactory: CacheFactory;
-
-    constructor(options: ClientOptions) {
+    constructor(homeserverUrl: string);
+    constructor(options: ClientOptions);
+    constructor(options: string | ClientOptions) {
         super();
-        this.options = {
-            rest: {
-                ...options.rest,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                baseURL: options.homeserverUrl,
-                headers: {
-                    ...Client.defaultHeaders,
-                    ...options.rest?.headers,
-                },
-                secure: true,
-                securityWorker: token => (
-                    token
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                    ? { headers: { Authorization: `Bearer ${token}` } }
-                    : {}
-                ),
-            },
-            sync: {},
-        };
+        this.options = this.buildOptions(options);
         this.rest = new MxHttpClient<string>(this.options.rest);
-        this.cacheFactory = new CacheFactory(options.cache);
 
         // Managers
         this.auth = new AuthManager(this, "auth");
         this.sync = new SyncManager(this, "sync", this.options.sync);
         this.rooms = new RoomManager(this, "room");
-        this.events = new EventManager(this, "event");
     }
 
     public async login(token: string): Promise<boolean>;
@@ -94,18 +73,31 @@ export default class Client extends EventEmitter {
             token = response.access_token;
         } else token = usernameOrToken;
 
+        let init = true;
         this.rest.setSecurityData(token);
+        if (!this.options.sync.since) {
+            this.logger.warn(
+                "No sync token provided. Performing full sync," +
+                " this might take a while."
+            );
+        }
+
         this.sync.sync((error?: Error, data?: SyncData) => {
             if (error) {
-                this.emit('error', error);
+                this.emit("error", error);
             }
 
             if (data) {
-                this.handleSync(data).catch(error => {
-                    this.emit('error', error);
+                this.handleSync(data).catch((error) => {
+                    this.emit("error", error);
                 });
+                if (init) {
+                    this.logger.debug("Ready to go!");
+                    this.emit("ready");
+                    init = false;
+                }
             }
-        })
+        });
 
         return true;
     }
@@ -115,8 +107,70 @@ export default class Client extends EventEmitter {
     }
 
     private async handleSync(data: SyncData): Promise<void> {
+        const start = Date.now();
         await this.rooms.handleSync(data);
+        const end = Date.now();
+        this.logger.debug(`Sync took ${end - start}ms to consume.`);
         // Finally emit to user-land
-        this.emit('sync', data);
+        this.emit("sync", data);
+    }
+
+    private get logger() {
+        return this.options.loggerFactory.getLogger("client");
+    }
+
+    private buildOptions(options: ClientOptions | string): InternalOptions {
+        const isString = typeof options === "string";
+        const result: InternalOptions = {
+            cacheFactory: new CacheFactory(),
+            loggerFactory: new SimpleLoggerFactory(this),
+            util: new Util(),
+            sync: {},
+            rest: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                baseURL: isString ? options : options.homeserverUrl,
+                headers: { ...Client.defaultHeaders },
+                secure: true,
+                securityWorker: (token) =>
+                    token
+                        ? // eslint-disable-next-line @typescript-eslint/naming-convention
+                          { headers: { Authorization: `Bearer ${token}` } }
+                        : {},
+            },
+        };
+        if (!isString) {
+            result.rest = { ...result.rest, ...options.rest };
+            result.rest.headers = {
+                ...result.rest.headers,
+                ...options.rest?.headers,
+            };
+        }
+
+        return result;
+    }
+}
+
+// All Events
+declare module "node:events" {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+    interface EventEmitter {
+        on(event: "sync", listener: (data: SyncData) => void): this;
+        on(
+            event: "logger.debug",
+            listener: (name: string, ...arguments_: any[]) => void
+        ): this;
+        on(
+            event: "logger.error",
+            listener: (name: string, ...arguments_: any[]) => void
+        ): this;
+        on(
+            event: "logger.info",
+            listener: (name: string, ...arguments_: any[]) => void
+        ): this;
+        on(
+            event: "logger.warn",
+            listener: (name: string, ...arguments_: any[]) => void
+        ): this;
+        on(event: "ready", listener: () => void): this;
     }
 }

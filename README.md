@@ -1,14 +1,23 @@
 
 # Examples
 
-
-## Working with Rooms
+## Client Initialization
 
 ```ts
 import mx from 'mx';
 
-// Events
 const client = new mx.Client('https://matrix.org');
+// Login Process
+await client.login('username', 'password');
+// or
+await client.login('token');
+```
+
+
+## Working with Rooms
+
+```ts
+// Events
 const room = await client.rooms.join('#matrix:matrix.org');
 const timeline = await room.events.getTimeline(20 /* optional */);
 console.log(timeline);
@@ -48,9 +57,6 @@ await knock.decline();
 ## Working with Members
 
 ```ts
-import mx from 'mx';
-
-const client = new mx.Client('https://matrix.org');
 const room = await client.rooms.get('#matrix:matrix.org');
 const member = await room.members.getMember('@example:matrix.org');
 
@@ -60,10 +66,14 @@ await member.getPowerLevel();
 // Kicking / Banning / Purging
 await member.kick('You are bad');
 await member.ban('You are bad', 1000 /* optional */);
-await member.purge(10, 'Optional Reason' /* optional */);
+await member.purge(10, 'stop spamming' /* optional */);
 await member.pardon(); // or unban();
 
 // DM
 const room = await member.getDMs();
+```
+
+## Handling Events
+
 ```
 

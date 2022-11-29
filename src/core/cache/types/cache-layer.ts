@@ -1,5 +1,8 @@
-export default abstract class CacheLayer<K, V> {
-    constructor(protected readonly holds: string) {}
+import type Entity from "../../entity.js";
+import type Manager from "../../manager.js";
+
+export default abstract class CacheLayer<K, V extends Entity<any>> {
+    constructor(protected readonly manager: Manager<K, V>, protected readonly holds: string) {}
     public abstract get(key: K): V | undefined;
     public abstract set(key: K, value: V): this;
     public abstract delete(key: K): boolean;

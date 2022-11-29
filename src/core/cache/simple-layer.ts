@@ -1,10 +1,13 @@
+import type Entity from "../entity.js";
+import type Manager from "../manager.js";
 import SyncCacheLayer from "./types/cache-layer.js";
 
-export default class SimpleCacheLayer<K, V> extends SyncCacheLayer<K, V> {
+/** @internal */
+export default class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCacheLayer<K, V> {
     private readonly map: Map<K, V>;
 
-    constructor(holds: string) {
-        super(holds);
+    constructor(manager: Manager<K, V>, holds: string) {
+        super(manager, holds);
         this.map = new Map();
     }
 
