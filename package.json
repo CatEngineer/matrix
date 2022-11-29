@@ -1,5 +1,5 @@
 {
-  "name": "eng-matrix",
+  "name": "matrix-cat",
   "version": "1.0.0",
   "description": "A Matrix Client-Server API Wrapper",
   "type": "module",
