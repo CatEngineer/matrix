@@ -7,14 +7,15 @@
 ```ts
 import mx from 'mx';
 
+// Events
 const client = new mx.Client('https://matrix.org');
 const room = await client.rooms.join('#matrix:matrix.org');
-const timeline = await room.getTimeline();
+const timeline = await room.events.getTimeline(20 /* optional */);
 console.log(timeline);
 
 // State Events
-const state = await room.getState('m.room.member', '@alice:matrix.org');
-const states = await room.getState();
+const state = await room.events.getState('m.room.member', '@alice:matrix.org');
+const states = await room.events.getState();
 
 // Room Profile
 const topic = await room.getTopic();
