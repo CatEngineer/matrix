@@ -26,7 +26,7 @@ const topic = await room.getTopic();
 await room.setTopic('New Topic!');
 await room.removeTopic();
 
-const name = await name = await room.getName();
+const name = await room.getName();
 await room.setName('New Name!');
 
 const avatar = await room.getAvatar();
