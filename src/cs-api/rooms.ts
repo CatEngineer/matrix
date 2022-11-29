@@ -1,10 +1,21 @@
+import Builder from "../core/builder.js";
 import Entity from "../core/entity.js";
 import Manager from "../core/manager.js";
 import type { SyncData } from "./generated/matrix.js";
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
-export class Room {
 
+type RawRoom = {
+    room_id: string;
+}
+
+export class Room extends Entity<RoomManager> {
+}
+
+class RoomBuilder extends Builder<RoomManager, RawRoom> {
+    public async build(from: RawRoom): Promise<Room> {
+        const entity = new Room(this.manager, from.room_id);
+        return entity;
+    }
 }
 
 export default class RoomManager extends Manager<string, Room> {
@@ -19,13 +30,14 @@ export default class RoomManager extends Manager<string, Room> {
         if (!data.rooms?.join) return;
         this.each(data.rooms.join, (room) => {
             this.each(room.state?.events, (state) => {
-                console.log(state.content);
             });
         });
     }
 
     private async handleKicks(data: SyncData): Promise<void> {
         this.each(data.rooms?.leave, (room) => {
+            this.each(room.state?.events, state => {
+            })
         });
     }
 

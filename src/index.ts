@@ -6,12 +6,12 @@ async function main(): Promise<void> {
     const client = new Client({
         homeserverUrl: process.env.MX_HOMESERVER_URL ?? "",
     });
-
-    try {
-        await client.login(process.env.MX_TOKEN ?? "");
-    } catch (error: unknown) {
-        console.log(error);
-    }
+    await client.login(process.env.MX_TOKEN ?? "");
+    const event = await client.events.getEvent(
+        '!CRupQtOJNBgnlrLkdH:arcticfoxes.net', 
+        '$gpQX80qUOEh29THVN4hXVXfnhcqNBYHajjPQ6BHBev8',
+    );
+    console.log(event.unsigned?.redacted_because);
 }
 
 await main();

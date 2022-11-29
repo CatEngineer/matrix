@@ -13,7 +13,7 @@ export default class SyncManager extends Manager<string, SyncData> {
     private static get defaultPullTimeout() { return 10_000; }
 
     constructor(
-        client: Client<any>,
+        client: Client,
         holds: string,
         protected readonly options: SyncOptions,
     ) {

@@ -10,6 +10,7 @@ import { MxHttpClient } from "../cs-api/generated/matrix.js";
 import CacheFactory from "../core/cache/index.js";
 import type { CacheOptions } from "../core/cache/index.js";
 import RoomManager from "../cs-api/rooms.js";
+import EventManager from "../cs-api/events/events.js";
 
 export type ClientOptions = {
     homeserverUrl: string;
@@ -42,6 +43,8 @@ export default class Client extends EventEmitter {
     public readonly sync: SyncManager;
 
     public readonly rooms: RoomManager;
+
+    public readonly events: EventManager;
 
     public readonly options: InternalOptions;
 
@@ -76,6 +79,7 @@ export default class Client extends EventEmitter {
         this.auth = new AuthManager(this, "auth");
         this.sync = new SyncManager(this, "sync", this.options.sync);
         this.rooms = new RoomManager(this, "room");
+        this.events = new EventManager(this, "event");
     }
 
     public async login(token: string): Promise<boolean>;
