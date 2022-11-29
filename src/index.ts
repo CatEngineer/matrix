@@ -1,9 +1,7 @@
 import Client from "./core/client.js";
 import process from "node:process";
 
-const client = new Client({
-    homeserverUrl: process.env.MX_HOMESERVER_URL ?? "",
-});
+const client = new Client(process.env.MX_HOMESERVER_URL ?? "");
 
 async function onReady(): Promise<void> {
     const room = await client.rooms.getRoom("!xGDfMAzPVtiqAxdQIu:privacyguides.org");
