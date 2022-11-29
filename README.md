@@ -13,6 +13,10 @@ const room = await client.rooms.join('#matrix:matrix.org');
 const timeline = await room.events.getTimeline(20 /* optional */);
 console.log(timeline);
 
+// Room Type
+// there will probably be more room types out of this.
+const type = await room.getType(); /* DM, Space, Room */
+
 // State Events
 const state = await room.events.getState('m.room.member', '@alice:matrix.org');
 const states = await room.events.getState();
