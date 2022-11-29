@@ -21,7 +21,12 @@ const states = await room.events.getState();
 const topic = await room.getTopic();
 await room.setTopic('New Topic!');
 await room.removeTopic();
+
+const name = await name = await room.getName();
 await room.setName('New Name!');
+
+const avatar = await room.getAvatar();
+const avatarUrl = await room.getAvatarUrl();
 await room.setAvatar('mxc://matrix.org/abc123');
 await room.setAvatar(/* Buffer */);
 await room.removeAvatar();
