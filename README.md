@@ -4,9 +4,11 @@
 ## Client Initialization
 
 ```ts
-import mx from 'mx';
+import Client from '@catengineer/matrix';
 
-const client = new mx.Client('https://matrix.org');
+// The client has a lot of configuration, but it can all 
+// be skipped by passing a homeserver URL instead.
+const client = new Client('https://matrix.org');
 // Login Process
 await client.login('username', 'password');
 // or
@@ -75,5 +77,18 @@ const room = await member.getDMs();
 
 ## Handling Events
 
+```ts
+import { SyncData } from '@catengineer/matrix';
+
+// Syncing
+client.on('sync', (sync: SyncData) => {
+
+});
+
+// Internal Logging 
+client.on('logger.debug', console.log);
+client.on('logger.info', console.log);
+client.on('logger.warn', console.log);
+client.on('logger.error', console.log);
 ```
 

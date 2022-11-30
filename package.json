@@ -1,12 +1,13 @@
 {
-  "name": "matrix-cat",
-  "version": "1.0.0",
+  "name": "@catengineer/matrix",
+  "version": "0.0.3",
   "description": "A Matrix Client-Server API Wrapper",
   "type": "module",
   "main": "lib/index.js",
   "types": "typings/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,7 @@
     "library"
   ],
   "author": "CatEngineer <contact@cat.engineer>",
-  "license": "apache-2.0",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": ">=5.43.0",
