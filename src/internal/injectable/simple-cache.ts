@@ -1,5 +1,5 @@
-import type { Entity, Manager } from "@internal/index.js";
-import { CacheFactory, SyncCacheLayer } from "@injectable/index.js";
+import type { Entity, Manager } from "../index.js";
+import { CacheFactory, SyncCacheLayer } from "../../core/index.js";
 
 /** @internal */
 class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCacheLayer<K, V> {

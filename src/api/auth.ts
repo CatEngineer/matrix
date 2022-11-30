@@ -1,5 +1,4 @@
-import Entity from "@internal/entity.js";
-import Manager from "@internal/manager.js";
+import { Entity, Manager } from "../internal/index.js";
 import type { LoginData } from "./api.js";
 
 type SelfUserConstruct = {

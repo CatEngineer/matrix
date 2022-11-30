@@ -1,16 +1,17 @@
 import { EventEmitter } from "node:events";
-import { SimpleCacheFactory, SimpleLoggerFactory } from "@internal/index.js";
-import { 
-    AuthManager, SyncManager, RoomManager,
+import {
+    AuthManager,
+    SyncManager,
+    RoomManager,
     MxHttpClient,
-} from "@api/index.js";
-import type {
-    ApiConfig,
-    SyncData,
-    SyncOptions
-} from "@api/index.js";
-import type { LoggerFactory, CacheFactory } from "@injectable/index.js";
-import Util from "@internal/util.js";
+} from "../api/index.js";
+import type { ApiConfig, SyncData, SyncOptions } from "../api/index.js";
+import type { LoggerFactory, CacheFactory } from "./injectable/index.js";
+import {
+    SimpleCacheFactory,
+    SimpleLoggerFactory,
+    Util,
+} from "../internal/index.js";
 
 export type ClientOptions = {
     homeserverUrl: string;
@@ -32,7 +33,7 @@ type InternalOptions = {
 // NOTE(dylhack): Replace EventEmitter with EventTarget once it stabalizes
 // - https://github.com/microsoft/TypeScript/issues/28357
 // - NodeJS labels "CustomEvens" as expiremental
-export default class Client extends EventEmitter {
+export class Client extends EventEmitter {
     private static get defaultHeaders() {
         return {
             "Content-Type": "application/json",

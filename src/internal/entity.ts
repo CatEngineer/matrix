@@ -1,5 +1,4 @@
-import Base from "./base.js";
-import type Manager from "./manager.js";
+import { Base, type Manager } from "./index.js";
 
 /** @internal */
 export default abstract class Entity<T extends Manager<any, any>> extends Base {

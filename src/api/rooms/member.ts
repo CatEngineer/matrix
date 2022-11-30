@@ -1,5 +1,5 @@
-import { Entity, Manager } from "@internal/index.js";
-import type { Room } from "@api/index.js";
+import { Entity, Manager } from "../../internal/index.js";
+import type { Room } from "../index.js";
 
 /** @internal */
 export type RoomMemberConstructData = {

@@ -1,7 +1,6 @@
 /* eslint-disable */
-import { Entity, Manager } from "@internal/index.js";
-import { EventManager, RoomMemberManager } from "@api/index.js";
-import type { SyncData } from "@api/api.js";
+import { Entity, Manager } from "../../internal/index.js";
+import { EventManager, RoomMemberManager, type SyncData } from "../index.js";
 
 /** @internal */
 export type RoomConstructData = {

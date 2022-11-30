@@ -1,4 +1,4 @@
-import type Client from "@core/index.js";
+import type { Client } from "../core/index.js";
 
 /** @internal */
 export default class Base {

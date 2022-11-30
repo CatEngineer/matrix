@@ -1,5 +1,5 @@
-import type Client from "@core/index.js";
-import { Entity, Manager } from "@internal/index.js";
+import { Entity, Manager } from "../internal/index.js";
+import type { Client } from "../core/index.js";
 import type {
     SyncData,
     SyncParams as SyncParameters,

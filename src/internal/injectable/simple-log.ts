@@ -1,5 +1,4 @@
-import { Logger } from "@injectable/log.js";
-import type Client from "@core/index.js";
+import { type Client, Logger } from "../../core/index.js";
 
 class SimpleLogger extends Logger {
     constructor(private readonly client: Client, name: string) {

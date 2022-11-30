@@ -1,7 +1,5 @@
-import { Base } from "@internal/index.js";
-import type Client from "@core/index.js";
-import type { CacheLayer } from "@injectable/index.js";
-import type { Entity } from "@internal/index.js";
+import type { Client, CacheLayer } from "../core/index.js";
+import { Base, type Entity } from "./index.js";
 
 /** @internal */
 export default abstract class Manager<K, V extends Entity<any>> extends Base {

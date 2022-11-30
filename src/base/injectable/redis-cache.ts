@@ -1,8 +1,7 @@
 import { createClient } from "redis";
 import type { RedisClientType } from "redis";
-import { AsyncCacheLayer } from "@injectable/index.js";
-import type { Entity, Manager } from "@internal/index.js";
-import { CacheFactory } from "@injectable/index.js";
+import type { Entity, Manager } from "../../internal/index.js";
+import { AsyncCacheLayer, CacheFactory } from "../../core/index.js";
 
 /** @internal */
 class RedisCacheLayer<K, V extends Entity<any>> extends AsyncCacheLayer<K, V> {

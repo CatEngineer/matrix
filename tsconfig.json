@@ -47,13 +47,6 @@
 
     /* Completeness */
     "skipLibCheck": true,                             /* Skip type checking all .d.ts files. */
-    "baseUrl": ".",
-    "paths": {
-      "@api/*": ["./src/cs-api/*"],
-      "@core/*": ["./src/core/*"],
-      "@injectable/*": ["./src/core/injectable/*"],
-      "@internal/*": ["./src/internal/*"],
-    }
   },
   "include": [
     "./src/**/*"

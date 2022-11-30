@@ -1,5 +1,5 @@
-import { Entity, Manager } from "@internal/index.js";
-import type { GetOneEventData, Room, RoomMember } from "@api/index.js";
+import { Entity, Manager } from "../internal/index.js";
+import type { GetOneEventData, Room, RoomMember } from "./index.js";
 
 type AnyEvent<T> = Event<T> | StateEvent<T>
 
