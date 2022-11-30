@@ -5,9 +5,7 @@ import type {
     SyncParams as SyncParameters,
 } from "./api.js";
 
-export type SyncOptions = SyncParameters & {
-    pullTimeout?: number;
-};
+export type SyncOptions = SyncParameters; 
 
 type SyncConstructData = {
     batchId: string;
@@ -32,12 +30,18 @@ export class SyncManager extends Manager<string, SyncEntity> {
         return 10_000;
     }
 
+    private readonly options: SyncOptions & { timeout: number };
+
     constructor(
         client: Client,
         holds: string,
-        protected readonly options: SyncOptions
+        options: SyncOptions
     ) {
         super(client, holds);
+        this.options = {
+            ...options,
+            timeout: options.timeout ?? SyncManager.defaultPullTimeout,
+        }
     }
 
     public sync(callback: (error?: Error, data?: SyncData) => void): void {
@@ -46,14 +50,11 @@ export class SyncManager extends Manager<string, SyncEntity> {
         const sync = async () => {
             // NOTE(dylhack): implicit object destruction to respect the inital
             //                next_batch passed to the constructor options.
-            const options: SyncOptions = since
-                ? { ...this.options, since }
-                : this.options;
-            console.log(`Syncing since: ${since ?? "never"}`);
+            console.log(`Syncing since: ${this.options.since ?? "never"}`);
             try {
-                const resp = await this.rest.matrix.sync(options);
+                const resp = await this.rest.matrix.sync(this.options);
                 callback(undefined, resp.data);
-                since = resp.data.next_batch;
+                this.options.since = resp.data.next_batch;
             } catch (error: unknown) {
                 if (error instanceof Error) callback(error);
                 clearTimeout(timeoutId);
@@ -64,7 +65,7 @@ export class SyncManager extends Manager<string, SyncEntity> {
             .then(() => {
                 timeoutId = setInterval(
                     sync,
-                    this.options.pullTimeout ?? SyncManager.defaultPullTimeout
+                    this.options.timeout,
                 );
             })
             .catch((error) => {
