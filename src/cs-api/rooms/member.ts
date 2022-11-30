@@ -1,6 +1,5 @@
-import Entity from "../../core/entity.js";
-import Manager from "../../core/manager.js";
-import type { Room } from "../rooms.js";
+import { Entity, Manager } from "@internal/index.js";
+import type { Room } from "@api/index.js";
 
 /** @internal */
 export type RoomMemberConstructData = {
@@ -10,7 +9,6 @@ export type RoomMemberConstructData = {
     membership?: string;
 }
 
-/** @internal */
 export class RoomMember extends Entity<RoomMemberManager> {
     public readonly room: Room;
 
@@ -22,6 +20,7 @@ export class RoomMember extends Entity<RoomMemberManager> {
 
     private readonly data: RoomMemberConstructData;
 
+    /** @internal */
     constructor(room: Room, opt: RoomMemberConstructData) {
         super(room.members, opt.id);
         this.room = room;
@@ -50,7 +49,7 @@ export class RoomMember extends Entity<RoomMemberManager> {
     }
 }
 
-export default class RoomMemberManager extends Manager<string, RoomMember> {
+export class RoomMemberManager extends Manager<string, RoomMember> {
     constructor(
         private readonly room: Room,
         holds: string,

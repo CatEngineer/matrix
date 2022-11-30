@@ -1,8 +1,7 @@
-import { Logger } from "./index.js";
-import type Client from "../client.js";
+import { Logger } from "@injectable/log.js";
+import type Client from "@core/index.js";
 
-/** @internal */
-export class SimpleLogger extends Logger {
+class SimpleLogger extends Logger {
     constructor(private readonly client: Client, name: string) {
         super(name);
     }
@@ -24,7 +23,8 @@ export class SimpleLogger extends Logger {
     }
 }
 
-export default class SimpleLoggerFactory {
+/** @internal */
+export class SimpleLoggerFactory {
     constructor(private readonly client: Client) {}
 
     public getLogger(name: string): Logger {

@@ -1,10 +1,9 @@
-import type Client from "../core/client.js";
-import Entity from "../core/entity.js";
-import Manager from "../core/manager.js";
+import type Client from "@core/index.js";
+import { Entity, Manager } from "@internal/index.js";
 import type {
     SyncData,
     SyncParams as SyncParameters,
-} from "./generated/matrix.js";
+} from "./api.js";
 
 export type SyncOptions = SyncParameters & {
     pullTimeout?: number;
@@ -28,7 +27,7 @@ export class SyncEntity extends Entity<SyncManager> {
     }
 }
 
-export default class SyncManager extends Manager<string, SyncEntity> {
+export class SyncManager extends Manager<string, SyncEntity> {
     private static get defaultPullTimeout() {
         return 10_000;
     }

@@ -1,5 +1,6 @@
-import type Client from "./client.js";
+import type Client from "@core/index.js";
 
+/** @internal */
 export default class Base {
     protected constructor(public readonly client: Client) {}
 

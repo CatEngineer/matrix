@@ -1,10 +1,11 @@
-import AsyncCacheLayer from "./types/async-cache-layer.js";
+import { createClient } from "redis";
 import type { RedisClientType } from "redis";
-import type Entity from "../entity.js";
-import type Manager from "../manager.js";
+import { AsyncCacheLayer } from "@injectable/index.js";
+import type { Entity, Manager } from "@internal/index.js";
+import { CacheFactory } from "@injectable/index.js";
 
 /** @internal */
-export default class RedisCacheLayer<K, V extends Entity<any>> extends AsyncCacheLayer<K, V> {
+class RedisCacheLayer<K, V extends Entity<any>> extends AsyncCacheLayer<K, V> {
     constructor(
         private readonly client: RedisClientType,
         manager: Manager<K, V>,
@@ -71,5 +72,28 @@ export default class RedisCacheLayer<K, V extends Entity<any>> extends AsyncCach
     private getKey(key: K): string {
         // NOTE(dylhack): this will do for now. We can improve this later.
         return JSON.stringify(key);
+    }
+}
+
+export class RedisCacheFactory extends CacheFactory {
+    private _redisClient?: RedisClientType = undefined;
+
+    constructor(private readonly redisUrl: string) { super(); }
+
+    public async getCacheLayer<K, V extends Entity<any>>(
+        manager: Manager<K, V>,
+        holds: string,
+    ): Promise<RedisCacheLayer<K, V>> {
+        const redisClient = await this.getRedisClient();
+        return new RedisCacheLayer(redisClient, manager, holds);
+    }
+
+    private async getRedisClient(): Promise<RedisClientType> {
+        if (!this._redisClient) {
+            this._redisClient = createClient({ url: this.redisUrl });
+            await this._redisClient.connect();
+        }
+
+        return this._redisClient;
     }
 }

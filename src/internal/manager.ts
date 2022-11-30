@@ -1,8 +1,9 @@
-import Base from "./base.js";
-import type { CacheLayer } from "./cache/index.js";
-import type Client from "./client.js";
-import type Entity from "./entity.js";
+import { Base } from "@internal/index.js";
+import type Client from "@core/index.js";
+import type { CacheLayer } from "@injectable/index.js";
+import type { Entity } from "@internal/index.js";
 
+/** @internal */
 export default abstract class Manager<K, V extends Entity<any>> extends Base {
     private _cache: CacheLayer<K, V> | undefined;
 
@@ -15,7 +16,7 @@ export default abstract class Manager<K, V extends Entity<any>> extends Base {
 
     public async getCache(): Promise<CacheLayer<K, V>> {
         if (!this._cache)
-            this._cache = await this.cacheFactory.getCacheLayer(
+            this._cache = await this.cacheFactory.getCacheLayer<K, V>(
                 this,
                 this.holds,
             );

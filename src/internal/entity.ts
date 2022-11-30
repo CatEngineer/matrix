@@ -1,6 +1,7 @@
 import Base from "./base.js";
 import type Manager from "./manager.js";
 
+/** @internal */
 export default abstract class Entity<T extends Manager<any, any>> extends Base {
     constructor(
         public readonly manager: T, 

@@ -46,7 +46,14 @@
     "allowUnreachableCode": false,                    /* Disable error reporting for unreachable code. */
 
     /* Completeness */
-    "skipLibCheck": true                              /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true,                             /* Skip type checking all .d.ts files. */
+    "baseUrl": ".",
+    "paths": {
+      "@api/*": ["./src/cs-api/*"],
+      "@core/*": ["./src/core/*"],
+      "@injectable/*": ["./src/core/injectable/*"],
+      "@internal/*": ["./src/internal/*"],
+    }
   },
   "include": [
     "./src/**/*"

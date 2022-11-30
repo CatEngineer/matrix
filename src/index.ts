@@ -1,26 +1,5 @@
-import Client from "./core/client.js";
-import process from "node:process";
+export * from "./base/index.js";
+export * from "./core/index.js";
+export * from "./cs-api/index.js";
 
-const client = new Client(process.env.MX_HOMESERVER_URL ?? "");
-
-async function onReady(): Promise<void> {
-    const room = await client.rooms.getRoom("!xGDfMAzPVtiqAxdQIu:privacyguides.org");
-    const states = await room.events.getRoomState();
-    for (const state of states) {
-        if (state.type === "m.room.member") {
-            console.log(state.content.membership);
-        }
-    }
-}
-
-async function main(): Promise<void> {
-    client.on("logger.debug", console.debug);
-    client.on("logger.error", console.error);
-    client.on("logger.info", console.info);
-    client.on("logger.warn", console.warn);
-    client.on("ready", onReady);
-
-    await client.login(process.env.MX_TOKEN ?? "");
-}
-
-await main();
+export { default } from "./core/index.js";

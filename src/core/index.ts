@@ -1,21 +1,23 @@
 import { EventEmitter } from "node:events";
-import AuthManager from "../cs-api/auth.js";
-import SyncManager from "../cs-api/sync.js";
-import type { SyncOptions } from "../cs-api/sync.js";
-import type { ApiConfig, SyncData } from "../cs-api/generated/matrix.js";
-import { MxHttpClient } from "../cs-api/generated/matrix.js";
-import CacheFactory from "../core/cache/index.js";
-import type { CacheOptions } from "../core/cache/index.js";
-import RoomManager from "../cs-api/rooms.js";
-import type LoggerFactory from "./log/index.js";
-import SimpleLoggerFactory from "./log/simple.js";
-import Util from "./util.js";
+import { SimpleCacheFactory, SimpleLoggerFactory } from "@internal/index.js";
+import { 
+    AuthManager, SyncManager, RoomManager,
+    MxHttpClient,
+} from "@api/index.js";
+import type {
+    ApiConfig,
+    SyncData,
+    SyncOptions
+} from "@api/index.js";
+import type { LoggerFactory, CacheFactory } from "@injectable/index.js";
+import Util from "@internal/util.js";
 
 export type ClientOptions = {
     homeserverUrl: string;
     sync?: SyncOptions;
     rest?: ApiConfig;
-    cache?: CacheFactory | CacheOptions;
+    cache?: CacheFactory;
+    logger?: LoggerFactory;
 };
 
 /** @internal */
@@ -78,7 +80,7 @@ export default class Client extends EventEmitter {
         if (!this.options.sync.since) {
             this.logger.warn(
                 "No sync token provided. Performing full sync," +
-                " this might take a while."
+                    " this might take a while."
             );
         }
 
@@ -121,9 +123,15 @@ export default class Client extends EventEmitter {
 
     private buildOptions(options: ClientOptions | string): InternalOptions {
         const isString = typeof options === "string";
+        const cacheFactory = isString
+            ? new SimpleCacheFactory()
+            : options.cache ?? new SimpleCacheFactory();
+        const loggerFactory = isString
+            ? new SimpleLoggerFactory(this)
+            : options.logger ?? new SimpleLoggerFactory(this);
         const result: InternalOptions = {
-            cacheFactory: new CacheFactory(),
-            loggerFactory: new SimpleLoggerFactory(this),
+            cacheFactory,
+            loggerFactory,
             util: new Util(),
             sync: {},
             rest: {
@@ -146,6 +154,7 @@ export default class Client extends EventEmitter {
             };
         }
 
+        console.debug(`Client Options`, result);
         return result;
     }
 }
@@ -174,3 +183,5 @@ declare module "node:events" {
         on(event: "ready", listener: () => void): this;
     }
 }
+
+export * from "./injectable/index.js";

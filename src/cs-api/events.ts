@@ -1,14 +1,12 @@
-import Entity from "../../core/entity.js";
-import Manager from "../../core/manager.js";
-import type { GetOneEventData, GetRoomStateData } from "../generated/matrix.js";
-import type { Room } from "../rooms.js";
-import { type RoomMember } from "../rooms/member.js";
+import { Entity, Manager } from "@internal/index.js";
+import type { GetOneEventData, Room, RoomMember } from "@api/index.js";
+
+type AnyEvent<T> = Event<T> | StateEvent<T>
 
 type Content<T> = T & Record<string, any>; 
 
 type EventConstructData = GetOneEventData;
 
-/** @internal */
 export class Event<T> extends Entity<EventManager> {
     /** @internal */
     public readonly data: EventConstructData;
@@ -48,6 +46,7 @@ export class Event<T> extends Entity<EventManager> {
 
     public readonly type: string;
 
+    /** @internal */
     constructor(manager: EventManager, raw: EventConstructData) {
         super(manager, raw.event_id);
         this.data = raw;
@@ -93,8 +92,7 @@ export class StateEvent<T> extends Event<T> {
     }
 }
 
-type AnyEvent<T> = Event<T> | StateEvent<T>
-export default class EventManager extends Manager<string, AnyEvent<any>> {
+export class EventManager extends Manager<string, AnyEvent<any>> {
     constructor(public readonly room: Room, holds: string) {
         super(room.client, holds);
     }

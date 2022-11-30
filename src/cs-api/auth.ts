@@ -1,6 +1,6 @@
-import Entity from "../core/entity.js";
-import Manager from "../core/manager.js";
-import type { LoginData } from "./generated/matrix.js";
+import Entity from "@internal/entity.js";
+import Manager from "@internal/manager.js";
+import type { LoginData } from "./api.js";
 
 type SelfUserConstruct = {
     id: string;
@@ -22,7 +22,7 @@ class SelfUser extends Entity<AuthManager> {
     }
 }
 
-export default class AuthManager extends Manager<string, SelfUser> {
+export class AuthManager extends Manager<string, SelfUser> {
     public async login(token: string): Promise<LoginData>;
     public async login(username: string, password: string): Promise<LoginData>;
     public async login(

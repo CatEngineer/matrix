@@ -1,16 +1,13 @@
 /* eslint-disable */
-import Entity from "../core/entity.js";
-import Manager from "../core/manager.js";
-import EventManager from "./events/events.js";
-import type { SyncData } from "./generated/matrix.js";
-import RoomMemberManager from "./rooms/member.js";
+import { Entity, Manager } from "@internal/index.js";
+import { EventManager, RoomMemberManager } from "@api/index.js";
+import type { SyncData } from "@api/api.js";
 
 /** @internal */
 export type RoomConstructData = {
     id: string;
 }
 
-/** @internal */
 export class Room extends Entity<RoomManager> {
     public readonly events: EventManager;
 
@@ -18,6 +15,7 @@ export class Room extends Entity<RoomManager> {
 
     private readonly data: RoomConstructData;
 
+    /** @internal */
     constructor(manager: RoomManager, data: RoomConstructData) {
         super(manager, data.id);
         this.events = new EventManager(this, `${this.id}-events`);
@@ -30,7 +28,7 @@ export class Room extends Entity<RoomManager> {
     }
 }
 
-export default class RoomManager extends Manager<string, Room> {
+export class RoomManager extends Manager<string, Room> {
     public async getRoom(id: string): Promise<Room> {
         return new Room(this, { id });
     }
@@ -48,8 +46,7 @@ export default class RoomManager extends Manager<string, Room> {
     }
 
     private async handleJoins(data: SyncData): Promise<void> {
-        if (!data.rooms?.join) return;
-        this.each(data.rooms.join, (room) => {
+        this.each(data.rooms?.join, (room) => {
             this.each(room.state?.events, (state) => {
             });
         });

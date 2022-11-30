@@ -6,6 +6,6 @@ export abstract class Logger {
     public abstract debug(...arguments_: any[]): void;
 }
 
-export default abstract class LoggerFactory {
+export abstract class LoggerFactory {
     public abstract getLogger(name: string): Logger;
 }

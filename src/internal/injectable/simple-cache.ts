@@ -1,9 +1,8 @@
-import type Entity from "../entity.js";
-import type Manager from "../manager.js";
-import SyncCacheLayer from "./types/cache-layer.js";
+import type { Entity, Manager } from "@internal/index.js";
+import { CacheFactory, SyncCacheLayer } from "@injectable/index.js";
 
 /** @internal */
-export default class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCacheLayer<K, V> {
+class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCacheLayer<K, V> {
     private readonly map: Map<K, V>;
 
     constructor(manager: Manager<K, V>, holds: string) {
@@ -28,7 +27,10 @@ export default class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCach
         this.map.clear();
     }
 
-    public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArgument?: any): void {
+    public forEach(
+        callbackfn: (value: V, key: K, map: Map<K, V>) => void,
+        thisArgument?: any
+    ): void {
         // eslint-disable-next-line unicorn/no-array-for-each, unicorn/no-array-callback-reference, unicorn/no-array-method-this-argument
         this.map.forEach(callbackfn, thisArgument);
     }
@@ -55,5 +57,15 @@ export default class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCach
 
     public [Symbol.iterator](): IterableIterator<[K, V]> {
         return this.map[Symbol.iterator]();
+    }
+}
+
+/** @internal */
+export class SimpleCacheFactory extends CacheFactory {
+    public async getCacheLayer<K, V extends Entity<any>>(
+        manager: Manager<K, V>,
+        holds: string
+    ): Promise<SimpleCacheLayer<K, V>> {
+        return new SimpleCacheLayer(manager, holds);
     }
 }
