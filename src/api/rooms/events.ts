@@ -119,7 +119,7 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
         if (cached) return cached as StateEvent<T>;
 
         const resp = await this.rest.getOneRoomEvent(this.room.id, id);
-        const result = resp.state_key 
+        const result = resp.state_key
             ? new StateEvent<T>(this, resp)
             : new Event<T>(this, resp);
 
@@ -159,9 +159,7 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
         // eslint-disable-next-line no-warning-comments
         // TODO(dylhack): cache this
         const resp = await this.rest.getRoomState(this.room.id);
-        const events = resp.map(
-            (data) => new StateEvent<any>(this, data)
-        );
+        const events = resp.map((data) => new StateEvent<any>(this, data));
         if (type) {
             return events.filter((event) => event.data.type === type);
         }
@@ -172,6 +170,41 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
     public async redact(id: string, reason?: string): Promise<void> {
         const txId = this.util.getTxId();
         await this.rest.redactEvent(this.room.id, id, txId, { reason });
+    }
+
+    public async sendEvent<T>(type: string, content: T): Promise<string> {
+        const txId = this.util.getTxId();
+        const resp = await this.rest.sendMessage(
+            this.room.id,
+            type,
+            txId,
+            content
+        );
+        return resp.event_id;
+    }
+
+    public async setState<T>(
+        type: string,
+        stateKey = "",
+        content?: T
+    ): Promise<string> {
+        const resp = await this.rest.setRoomStateWithKey(
+            this.room.id,
+            type,
+            stateKey,
+            content ?? {}
+        );
+        return resp.event_id;
+    }
+
+    public async sendText(message: string): Promise<string> {
+        const messageType = this.client.options.botDisclosure
+            ? "m.notice"
+            : "m.text";
+        return this.sendEvent("m.room.message", {
+            msgtype: messageType,
+            body: message,
+        });
     }
 
     /** @internal */

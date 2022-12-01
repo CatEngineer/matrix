@@ -28,7 +28,15 @@ interface CustomListener<T> extends EventListener {
 
 type NodeListener<T> = (data: T) => void;
 
+/**
+ * @prop {SyncOptions?} sync (default: { timeout: 10_000 })
+ * @prop {boolean?} botDisclosure Disclose to everyone you're a bot. (default: true)
+ * @prop {RestFactory?} rest Custom REST client (default: SimpleRestFactory)
+ * @prop {CacheFactory?} cache Custom cache (default: SimpleCacheFactory)
+ * @prop {LoggerFactory?} logger Custom logger (default: SimpleLoggerFactory)
+ */
 type ClientOptions = {
+    botDisclosure?: boolean;
     sync?: SyncOptions;
     rest?: RestFactory;
     cache?: CacheFactory;
@@ -36,6 +44,7 @@ type ClientOptions = {
 };
 
 type InternalOptions = {
+    botDisclosure: boolean;
     sync: SyncOptions;
     restFactory: RestFactory;
     cacheFactory: CacheFactory;
@@ -180,6 +189,7 @@ export default class Client extends EventTarget {
             restFactory: options?.rest ?? new SimpleRestFactory(hsUrl),
             util: new Util(),
             sync: options?.sync ?? {},
+            botDisclosure: options?.botDisclosure ?? true,
         };
     }
 

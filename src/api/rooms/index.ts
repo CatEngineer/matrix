@@ -71,4 +71,4 @@ export class RoomManager extends Manager<string, Room> {
     }
 }
 
-export * from './member.js';
+export * from './members.js';
