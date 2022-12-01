@@ -86,9 +86,6 @@ client.on('sync', (sync: SyncData) => {
 });
 
 // Internal Logging 
-client.on('logger.debug', console.log);
-client.on('logger.info', console.log);
-client.on('logger.warn', console.log);
-client.on('logger.error', console.log);
+client.on('debug', console.log);
 ```
 

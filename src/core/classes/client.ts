@@ -50,9 +50,6 @@ type CustomEvents = {
     "ready": undefined;
 }
 
-// NOTE(dylhack): Replace EventEmitter with EventTarget once it stabalizes
-// - https://github.com/microsoft/TypeScript/issues/28357
-// - NodeJS labels "CustomEvens" as expiremental
 export default class Client extends EventTarget {
     public readonly rest: MxApi.MxHttpClient;
 
