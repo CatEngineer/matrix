@@ -54,6 +54,7 @@ export class Event<T> extends Entity<EventManager> {
         this.data = raw;
         this.content = raw.content as Content<T>;
         this.unsigned = {
+            ...raw.unsigned,
             age: raw.unsigned?.age,
             previous:
                 raw.unsigned?.prev_content === undefined
