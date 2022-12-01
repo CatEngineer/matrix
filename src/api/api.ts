@@ -7,7 +7,6 @@
 //----------------------
 // ReSharper disable InconsistentNaming
 
-/** @internal */
 export module MxApi {
 
 export class MxHttpClient {
