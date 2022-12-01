@@ -1,5 +1,5 @@
 import { Entity, Manager } from "../core/classes/index.js";
-import { MxApi } from "./api.js";
+import type { MxApi } from "./api.js";
 
 type SelfUserConstruct = {
     id: string;
@@ -30,7 +30,7 @@ export class AuthManager extends Manager<string, SelfUser> {
     ): Promise<MxApi.Anonymous38> {
         if (password) {
             const resp = await this.rest.login({
-                  type: MxApi.Body21Type.M_login_password,
+                  type: "m.login.password",
                   user: usernameOrToken,
                   password,
             });
@@ -38,7 +38,7 @@ export class AuthManager extends Manager<string, SelfUser> {
         }
 
         const resp = await this.rest.login({
-            type: MxApi.Body21Type.M_login_token,
+            type: "m.login.token",
             token: usernameOrToken,
         });
         return resp;
