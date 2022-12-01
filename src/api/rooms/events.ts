@@ -89,10 +89,10 @@ export class Event<T> extends Entity<EventManager> {
     }
 }
 
-/** @internal */
 export class StateEvent<T> extends Event<T> {
     public readonly stateKey: string;
 
+    /** @internal */
     constructor(manager: EventManager, raw: EventConstructData) {
         super(manager, raw);
         this.stateKey = raw.state_key ?? "";
