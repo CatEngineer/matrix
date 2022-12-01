@@ -21,7 +21,6 @@ import {
 import type { CustomEvent } from "./events.js";
 import Util from "./util.js";
 
-
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 interface CustomListener<T> extends EventListener {
     (data: CustomEvent<T>): void;
@@ -45,13 +44,10 @@ type InternalOptions = {
 };
 
 type CustomEvents = {
-    "logger.debug": Log 
-    "logger.error": Log
-    "logger.info": Log
-    "logger.warn": Log
-    "sync": SyncData
-    "error": Error
-    "ready": undefined
+    "debug": Log ;
+    "sync": SyncData;
+    "error": Error;
+    "ready": undefined;
 }
 
 // NOTE(dylhack): Replace EventEmitter with EventTarget once it stabalizes
@@ -93,6 +89,7 @@ export default class Client extends EventTarget {
         usernameOrToken: string,
         password?: string
     ): Promise<boolean> {
+        this.logger.debug('Starting client with options:', this.options);
         let token: string;
         if (password) {
             const response = await this.auth.login(usernameOrToken, password);

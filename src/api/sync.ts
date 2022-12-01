@@ -50,7 +50,7 @@ export class SyncManager extends Manager<string, SyncEntity> {
         const sync = async () => {
             // NOTE(dylhack): implicit object destruction to respect the inital
             //                next_batch passed to the constructor options.
-            console.log(`Syncing since: ${this.options.since ?? "never"}`);
+            this.logger.debug(`Syncing since: ${this.options.since ?? "never"}`);
             try {
                 const resp = await this.rest.sync(
                     this.options.filter,

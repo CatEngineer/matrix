@@ -2,13 +2,17 @@ import { CustomEvent } from "../../core/classes/events.js";
 import { type Client, Logger } from "../../core/index.js";
 
 type Levels = "debug" | "error" | "warn" | "info";
-export type Log = { name: string; args: any[] };
+export type Log = { level: Levels, name: string; args: any[] };
+type ToString = {
+    toString(): string;
+}
 
-class LogEvent extends CustomEvent<Log> {
-    constructor(level: Levels, name: string, _arguments: any[]) {
-        super(`logger.${level}`, { 
+class LogEvent<T extends ToString> extends CustomEvent<Log> {
+    constructor(level: Levels, name: string, _arguments: T[]) {
+        super('debug', { 
             detail: { 
                 name, 
+                level,
                 args: _arguments,
             } 
         });

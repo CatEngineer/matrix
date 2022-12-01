@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Entity, Manager } from "../../core/index.js";
 import type { Room, RoomMember } from "../../index.js";
 import type { MxApi } from "../api.js";
@@ -98,6 +99,14 @@ export class StateEvent<T> extends Event<T> {
         super(manager, raw);
         this.stateKey = raw.state_key ?? "";
     }
+
+    public async getReplaces(): Promise<StateEvent<T> | undefined> {
+        const replaces = this.unsigned?.replaces_state;
+        if (!replaces) return;
+        const replacesId = replaces as string;
+        const result = await this.manager.getEvent<T>(replacesId);
+        return result as StateEvent<T>;
+    }
 }
 
 export class EventManager extends Manager<string, AnyEvent<any>> {
@@ -105,12 +114,14 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
         super(room.client, holds);
     }
 
-    public async getEvent<T>(id: string): Promise<Event<T>> {
+    public async getEvent<T>(id: string): Promise<AnyEvent<T>> {
         const cached = await this.getCachedEvent(id);
         if (cached) return cached as StateEvent<T>;
 
         const resp = await this.rest.getOneRoomEvent(this.room.id, id);
-        const result = new Event<T>(this, resp);
+        const result = resp.state_key 
+            ? new StateEvent<T>(this, resp)
+            : new Event<T>(this, resp);
 
         await this.cacheEvent(result);
         return result;
