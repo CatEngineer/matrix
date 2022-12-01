@@ -1,4 +1,4 @@
-import { Entity, Manager } from "../../internal/index.js";
+import { Entity, Manager } from "../../core/index.js";
 import type { Room } from "../index.js";
 
 /** @internal */
@@ -60,6 +60,14 @@ export class RoomMemberManager extends Manager<string, RoomMember> {
     public async getMember(memberId: string): Promise<RoomMember> {
         const state = await this.room.events.getState('m.room.member', memberId);
         return new RoomMember(this.room, { ...state.content, id: memberId });
+    }
+
+    public async getMembers(limit = 100): Promise<RoomMember[]> {
+        const members = await this.room.events.getRoomState('m.room.member');
+        return members.map((member) => new RoomMember(
+            this.room, 
+            { ...member.content, id: member.stateKey },
+        ));
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention

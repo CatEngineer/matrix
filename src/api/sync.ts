@@ -1,11 +1,15 @@
-import { Entity, Manager } from "../internal/index.js";
-import type { Client } from "../core/index.js";
-import type {
-    SyncData,
-    SyncParams as SyncParameters,
-} from "./api.js";
+import { type Client, Entity, Manager } from "../core/index.js";
+import type { MxApi } from "./api.js";
 
-export type SyncOptions = SyncParameters; 
+export type SyncOptions = {
+    filter?: string;
+    since?: string;
+    fullState?: boolean;
+    setPresence?: MxApi.Set_presence;
+    timeout?: number;
+};
+
+export type SyncData = MxApi.Anonymous69;
 
 type SyncConstructData = {
     batchId: string;
@@ -32,29 +36,30 @@ export class SyncManager extends Manager<string, SyncEntity> {
 
     private readonly options: SyncOptions & { timeout: number };
 
-    constructor(
-        client: Client,
-        holds: string,
-        options: SyncOptions
-    ) {
+    constructor(client: Client, holds: string, options: SyncOptions) {
         super(client, holds);
         this.options = {
-            ...options,
             timeout: options.timeout ?? SyncManager.defaultPullTimeout,
-        }
+            ...options,
+        };
     }
 
+    /** @internal */
     public sync(callback: (error?: Error, data?: SyncData) => void): void {
-        let since: string;
         let timeoutId: NodeJS.Timer;
         const sync = async () => {
             // NOTE(dylhack): implicit object destruction to respect the inital
             //                next_batch passed to the constructor options.
             console.log(`Syncing since: ${this.options.since ?? "never"}`);
             try {
-                const resp = await this.rest.matrix.sync(this.options);
-                callback(undefined, resp.data);
-                this.options.since = resp.data.next_batch;
+                const resp = await this.rest.sync(
+                    this.options.filter,
+                    this.options.since,
+                    this.options.fullState,
+                    this.options.setPresence
+                );
+                callback(undefined, resp);
+                this.options.since = resp.next_batch;
             } catch (error: unknown) {
                 if (error instanceof Error) callback(error);
                 clearTimeout(timeoutId);
@@ -63,10 +68,7 @@ export class SyncManager extends Manager<string, SyncEntity> {
 
         sync()
             .then(() => {
-                timeoutId = setInterval(
-                    sync,
-                    this.options.timeout,
-                );
+                timeoutId = setInterval(sync, this.options.timeout);
             })
             .catch((error) => {
                 callback(error);

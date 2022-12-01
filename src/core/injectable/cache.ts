@@ -1,6 +1,5 @@
-import type { Entity, Manager } from "../../internal/index.js";
+import type { Entity, Manager } from "../index.js";
 
-/** @internal */
 export type CacheLayer<K, V extends Entity<any>> = AsyncCacheLayer<K, V> | SyncCacheLayer<K, V>;
 
 export abstract class AsyncCacheLayer<K, V extends Entity<any>> {

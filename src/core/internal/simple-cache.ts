@@ -1,5 +1,12 @@
-import type { Entity, Manager } from "../index.js";
-import { CacheFactory, SyncCacheLayer } from "../../core/injectable/index.js";
+import {
+    type Entity,
+    type Manager,
+} from "../classes/index.js";
+import {
+    CacheFactory,
+    SyncCacheLayer,
+    type CacheLayer,
+} from "../injectable/index.js";
 
 /** @internal */
 class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCacheLayer<K, V> {
@@ -65,7 +72,7 @@ export class SimpleCacheFactory extends CacheFactory {
     public async getCacheLayer<K, V extends Entity<any>>(
         manager: Manager<K, V>,
         holds: string
-    ): Promise<SimpleCacheLayer<K, V>> {
+    ): Promise<CacheLayer<K, V>> {
         return new SimpleCacheLayer(manager, holds);
     }
 }

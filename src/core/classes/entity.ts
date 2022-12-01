@@ -1,6 +1,6 @@
-import { Base, type Manager } from "./index.js";
+import Base from "./base.js";
+import type Manager from "./manager.js";
 
-/** @internal */
 export default abstract class Entity<T extends Manager<any, any>> extends Base {
     constructor(
         public readonly manager: T, 
@@ -11,5 +11,4 @@ export default abstract class Entity<T extends Manager<any, any>> extends Base {
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     public abstract toJSON(): any;
-
 }

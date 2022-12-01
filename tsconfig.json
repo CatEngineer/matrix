@@ -3,10 +3,10 @@
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */
-    "incremental": false,                              /* Save .tsbuildinfo files to allow for incremental compilation of projects. */
+    "incremental": false,                             /* Save .tsbuildinfo files to allow for incremental compilation of projects. */
 
     /* Language and Environment */
-    "target": "ESNext",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "target": "ESNext",                               /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     "experimentalDecorators": true,                   /* Enable experimental support for TC39 stage 2 draft decorators. */
     "emitDecoratorMetadata": true,                    /* Emit design-type metadata for decorated declarations in source files. */
     "moduleDetection": "auto",                        /* Control what method is used to detect module-format JS files. */

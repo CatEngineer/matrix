@@ -1,5 +1,5 @@
-import { Entity, Manager } from "../internal/index.js";
-import type { LoginData } from "./api.js";
+import { Entity, Manager } from "../core/classes/index.js";
+import { MxApi } from "./api.js";
 
 type SelfUserConstruct = {
     id: string;
@@ -22,34 +22,34 @@ class SelfUser extends Entity<AuthManager> {
 }
 
 export class AuthManager extends Manager<string, SelfUser> {
-    public async login(token: string): Promise<LoginData>;
-    public async login(username: string, password: string): Promise<LoginData>;
+    public async login(token: string): Promise<MxApi.Anonymous38>;
+    public async login(username: string, password: string): Promise<MxApi.Anonymous38>;
     public async login(
         usernameOrToken: string,
         password?: string
-    ): Promise<LoginData> {
+    ): Promise<MxApi.Anonymous38> {
         if (password) {
-            const resp = await this.rest.matrix.login({
-                  type: "m.login.password",
+            const resp = await this.rest.login({
+                  type: MxApi.Body21Type.M_login_password,
                   user: usernameOrToken,
                   password,
             });
-            return resp.data;
+            return resp;
         }
 
-        const resp = await this.rest.matrix.login({
-            type: "m.login.token",
+        const resp = await this.rest.login({
+            type: MxApi.Body21Type.M_login_token,
             token: usernameOrToken,
         });
-        return resp.data;
+        return resp;
     }
 
     public async logout(): Promise<void> {
-        await this.rest.matrix.logout();
+        await this.rest.logout();
     }
 
     public async logoutAll(): Promise<void> {
-        await this.rest.matrix.logoutAll();
+        await this.rest.logout_all();
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
