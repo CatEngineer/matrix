@@ -1,4 +1,3 @@
-import { EventEmitter } from "node:events";
 import { MxApi } from "../../api/api.js";
 import {
     AuthManager,
@@ -12,12 +11,23 @@ import type {
     LoggerFactory,
     CacheFactory,
 } from "../injectable/index.js";
+import { ErrorEvent, ReadyEvent, SyncEvent } from "../internal/events.js";
 import {
+    type Log,
     SimpleCacheFactory,
     SimpleLoggerFactory,
     SimpleRestFactory,
 } from "../internal/index.js";
+import type { CustomEvent } from "./events.js";
 import Util from "./util.js";
+
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+interface CustomListener<T> extends EventListener {
+    (data: CustomEvent<T>): void;
+}
+
+type NodeListener<T> = (data: T) => void;
 
 type ClientOptions = {
     sync?: SyncOptions;
@@ -26,7 +36,6 @@ type ClientOptions = {
     logger?: LoggerFactory;
 };
 
-/** @internal */
 type InternalOptions = {
     sync: SyncOptions;
     restFactory: RestFactory;
@@ -35,12 +44,20 @@ type InternalOptions = {
     util: Util;
 };
 
-type LogListener = (name: string, ...arguments_: any[]) => void;
+type CustomEvents = {
+    "logger.debug": Log 
+    "logger.error": Log
+    "logger.info": Log
+    "logger.warn": Log
+    "sync": SyncData
+    "error": Error
+    "ready": undefined
+}
 
 // NOTE(dylhack): Replace EventEmitter with EventTarget once it stabalizes
 // - https://github.com/microsoft/TypeScript/issues/28357
 // - NodeJS labels "CustomEvens" as expiremental
-export default class Client extends EventEmitter {
+export default class Client extends EventTarget {
     public readonly rest: MxApi.MxHttpClient;
 
     public readonly auth: AuthManager;
@@ -49,6 +66,7 @@ export default class Client extends EventEmitter {
 
     public readonly rooms: RoomManager;
 
+    /** @internal */
     public readonly options: InternalOptions;
 
     constructor(homeserverUrl: string, options?: ClientOptions) {
@@ -92,16 +110,16 @@ export default class Client extends EventEmitter {
 
         this.sync.sync((error?: Error, data?: SyncData) => {
             if (error) {
-                this.emit("error", error);
+                this.dispatchEvent(new ErrorEvent(error));
             }
 
             if (data) {
                 this.handleSync(data).catch((error) => {
-                    this.emit("error", error);
+                    this.dispatchEvent(new ErrorEvent(error));
                 });
                 if (init) {
                     this.logger.debug("Ready to go!");
-                    this.emit("ready");
+                    this.dispatchEvent(new ReadyEvent());
                     init = false;
                 }
             }
@@ -114,13 +132,47 @@ export default class Client extends EventEmitter {
         await this.auth.logout();
     }
 
+    public on<T extends keyof CustomEvents>(
+        type: T, 
+        listener: NodeListener<CustomEvents[T]>,
+    ): this {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        this.addEventListener(type, (event: CustomEvent<CustomEvents[T]>) => {
+            listener(event.detail);
+        })
+        return this;
+    }
+
+    public once<T extends keyof CustomEvents>(type: T, listener: NodeListener<CustomEvents[T]>): this {
+        const onEvent = (event: CustomEvent<CustomEvents[T]>) => {
+            listener(event.detail);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            this.removeEventListener(type, onEvent);
+        }
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        this.addEventListener<T>(type, onEvent);
+        return this;
+    }
+
+    public addEventListener<T extends keyof CustomEvents>(
+        type: T, 
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        listener: CustomListener<CustomEvents[T]> | null,
+    ): void {
+        super.addEventListener(type, listener);
+    }
+
     private async handleSync(data: SyncData): Promise<void> {
         const start = Date.now();
         await this.rooms.handleSync(data);
         const end = Date.now();
         this.logger.debug(`Sync took ${end - start}ms to consume.`);
         // Finally emit to user-land
-        this.emit("sync", data);
+        this.dispatchEvent(new SyncEvent(data));
     }
 
     private get logger() {
@@ -136,20 +188,5 @@ export default class Client extends EventEmitter {
             sync: options?.sync ?? {},
         };
     }
-}
 
-
-// All Events
-declare module "node:events" {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-    interface EventEmitter {
-        on(event: "ready", listener: () => void): this;
-        on(event: "error", listener: (error: Error) => void): this;
-        on(event: "sync", listener: (data: SyncData) => void): this;
-        // Logger Stuff
-        on(event: "logger.debug", listener: LogListener): this;
-        on(event: "logger.error", listener: LogListener): this;
-        on(event: "logger.info", listener: LogListener): this;
-        on(event: "logger.warn", listener: LogListener): this;
-    }
 }

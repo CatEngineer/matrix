@@ -1,4 +1,19 @@
+import { CustomEvent } from "../../core/classes/events.js";
 import { type Client, Logger } from "../../core/index.js";
+
+type Levels = "debug" | "error" | "warn" | "info";
+export type Log = { name: string; args: any[] };
+
+class LogEvent extends CustomEvent<Log> {
+    constructor(level: Levels, name: string, _arguments: any[]) {
+        super(`logger.${level}`, { 
+            detail: { 
+                name, 
+                args: _arguments,
+            } 
+        });
+    }
+}
 
 class SimpleLogger extends Logger {
     constructor(private readonly client: Client, name: string) {
@@ -6,19 +21,23 @@ class SimpleLogger extends Logger {
     }
 
     public debug(...arguments_: any[]): void {
-        this.client.emit("logger.debug", this.name, ...arguments_);
+        this.emit("debug", this.name, ...arguments_);
     }
 
     public error(...arguments_: any[]): void {
-        this.client.emit("logger.error", this.name, ...arguments_);
+        this.emit("error", this.name, ...arguments_);
     }
 
     public info(...arguments_: any[]): void {
-        this.client.emit("logger.info", this.name, ...arguments_);
+        this.emit("info", this.name, ...arguments_);
     }
 
     public warn(...arguments_: any[]): void {
-        this.client.emit("logger.warn", this.name, ...arguments_);
+        this.emit("warn", this.name, ...arguments_);
+    }
+
+    private emit(level: Levels, name: string, ...arguments_: any[]): void {
+        this.client.dispatchEvent(new LogEvent(level, name, arguments_));
     }
 }
 
