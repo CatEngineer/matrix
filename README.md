@@ -97,6 +97,8 @@ const room = await member.getDMs();
 ## Handling Events
 
 ```ts
+import type { MxEvent, MxStateEvent } from "@catengineer/matrix";
+
 // Syncing
 client.on('sync', (data) => {});
 
@@ -106,13 +108,13 @@ client.on('sync', (data) => {});
 client.on('room.leave', (leave) => {});
 
 // Every state event of every room you're currently in
-client.on('room.state', (state) => {});
+client.on('room.state', (state: MxStateEvent<any>) => {});
 
 // Every event of every room you're currently in
-client.on('room.event', (event) => {});
+client.on('room.event', (event: MxEvent<any>) => {});
 
 // Finally provide an event type you want to listen to
-client.on('m.room.member', (event) => {});
+client.on('m.room.member', (event: MxEvent<any>) => {});
 
 // Internal Logging 
 client.on('debug', console.log);
