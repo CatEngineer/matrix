@@ -3,7 +3,8 @@ import { Entity, Manager } from "../../core/index.js";
 import type { Room, RoomMember } from "../../index.js";
 import type { MxApi } from "../api.js";
 
-type AnyMxEvent<T> = MxEvent<T> | MxStateEvent<T>;
+/** @internal */
+export type AnyMxEvent<T> = MxEvent<T> | MxStateEvent<T>;
 
 type Content<T> = Exclude<T & Record<string, any>, any[]>;
 

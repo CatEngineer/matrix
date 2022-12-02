@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Entity, Manager } from "../../core/classes/index.js";
-import { RoomEvent, RoomLeaveEvent, RoomStateEvent } from "../../core/internal/events.js";
+import { RoomEvent, RoomLeaveEvent, RoomSpecificEvent, RoomStateEvent } from "../../core/internal/events.js";
 import { EventManager, RoomMemberManager, Self, type SyncData } from "../index.js";
 import { MxEvent, MxStateEvent } from "../index.js";
 
@@ -59,10 +59,12 @@ export class RoomManager extends Manager<string, Room> {
                 data.state?.events?.forEach((event) => {
                     const emittable = new MxStateEvent(room.events, event);
                     this.client.dispatchEvent(new RoomStateEvent(emittable));
+                    this.client.dispatchEvent(new RoomSpecificEvent(emittable));
                 });
                 data.timeline?.events?.forEach((event) => {
                     const emittable = new MxEvent(room.events, event);
                     this.client.dispatchEvent(new RoomEvent(emittable));
+                    this.client.dispatchEvent(new RoomSpecificEvent(emittable));
                 });
             });
         });

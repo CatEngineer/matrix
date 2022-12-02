@@ -14,6 +14,7 @@ import type {
 import {
     ErrorEvent,
     ReadyEvent,
+    type RoomSpecificEvent,
     SyncEvent,
 } from "../internal/events.js";
 import type {
@@ -156,6 +157,7 @@ export default class Client extends EventTarget {
         this.sync.killSync();
     }
 
+    public on(type: string, listener: NodeListener<RoomSpecificEvent<any>["detail"]>): this;
     public on<T extends keyof CustomEvents>(
         type: T,
         listener: NodeListener<CustomEvents[T]>
@@ -168,6 +170,7 @@ export default class Client extends EventTarget {
         return this;
     }
 
+    public once(type: string, listener: NodeListener<RoomSpecificEvent<any>["detail"]>): this;
     public once<T extends keyof CustomEvents>(
         type: T,
         listener: NodeListener<CustomEvents[T]>
@@ -185,6 +188,7 @@ export default class Client extends EventTarget {
         return this;
     }
 
+    public addEventListener(type: string, listener: CustomListener<RoomSpecificEvent<any>>): void;
     public addEventListener<T extends keyof CustomEvents>(
         type: T,
         // eslint-disable-next-line @typescript-eslint/ban-types

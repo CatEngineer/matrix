@@ -1,10 +1,16 @@
 import { CustomEvent } from "../classes/events.js";
 import type { SyncData } from "../../index.js";
-import type { MxEvent, MxStateEvent } from "../../index.js";
+import type { AnyMxEvent, MxEvent, MxStateEvent } from "../../index.js";
 
 export type RoomLeaveEventData = {
     timeline: Array<MxEvent<any>>,
     state: Array<MxStateEvent<any>>,
+}
+
+export class RoomSpecificEvent<T> extends CustomEvent<AnyMxEvent<T>> {
+    constructor(event: AnyMxEvent<T>) {
+        super(event.type, { detail: event });
+    }
 }
 
 /** @internal */
