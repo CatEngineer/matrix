@@ -68,6 +68,7 @@ export class SyncManager extends Manager<string, SyncEntity> {
                 this.options.since = resp.next_batch;
             } catch (error: unknown) {
                 if (error instanceof Error) callback(error);
+                if (this.options.killOnError) this.killSync();
             }
 
         }, this.options.timeout);
