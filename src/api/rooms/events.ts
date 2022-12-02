@@ -10,6 +10,13 @@ type Content<T> = Exclude<T & Record<string, any>, any[]>;
 
 type EventConstructData = MxApi.ClientEventWithoutRoomID2;
 
+export type PowerLevelData = {
+    events: Record<string, number>;
+    notifications: Record<string, number>;
+    users: Record<string, number>;
+    users_default: 0
+} & Record<string, number>;
+
 export type RoomMemberStateContent = {
     membership?: string;
     displayname?: string;
@@ -123,6 +130,10 @@ export class MxStateEvent<T> extends MxEvent<T> {
 export class EventManager extends Manager<string, AnyMxEvent<any>> {
     constructor(public readonly room: Room) {
         super(room.client, "events");
+    }
+
+    public async getPowerLevel(): Promise<MxStateEvent<PowerLevelData>> {
+        return this.getState<PowerLevelData>("m.room.power_levels");
     }
 
     public async getEvent<T>(id: string): Promise<AnyMxEvent<T>> {

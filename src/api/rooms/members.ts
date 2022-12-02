@@ -39,6 +39,14 @@ export class RoomMember extends Entity<RoomMemberManager> {
         return this.client.rooms.getRoom(this.room.id);
     }
 
+    public async getPowerLevel(): Promise<number> {
+        const room = await this.getRoom();
+        const powerLevels = await room.events.getPowerLevel();
+        const uLevel = powerLevels.content.users[this.id];
+        if (uLevel) return uLevel;
+        return powerLevels.content.users_default;
+    }
+
     public async getAvatar(): Promise<Buffer | undefined> {
         if (!this.avatarUrl) return;
         throw new Error("Not implemented");
