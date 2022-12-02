@@ -208,8 +208,11 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
     }
 
     public async sendMarkdown(message: string): Promise<string> {
+        const messageType = this.client.options.botDisclosure
+            ? "m.notice"
+            : "m.text";
         return this.sendEvent("m.room.message", {
-            msgtype: "m.text",
+            msgtype: messageType,
             format: "org.matrix.custom.html",
             body: message,
             // eslint-disable-next-line @typescript-eslint/naming-convention
