@@ -53,7 +53,7 @@ export class SyncManager extends Manager<string, SyncEntity> {
 
     /** @internal */
     public sync(callback: (error?: Error, data?: SyncData) => void): void {
-        const sync = async () => {
+        const timer = setInterval(async () => {
             // NOTE(dylhack): implicit object destruction to respect the inital
             //                next_batch passed to the constructor options.
             this.logger.debug(`Syncing since: ${this.options.since ?? "never"}`);
@@ -69,21 +69,18 @@ export class SyncManager extends Manager<string, SyncEntity> {
             } catch (error: unknown) {
                 if (error instanceof Error) callback(error);
             }
-        };
 
-        sync()
-            .then(() => {
-                const timeoutId = setInterval(sync, this.options.timeout);
-                if (typeof timeoutId === "number") this.timers.push(timeoutId);
-                else this.timers.push(timeoutId[Symbol.toPrimitive]());
-            })
-            .catch((error) => {
-                if (this.options.killOnError) this.killSync();
-                callback(error);
-            });
+        }, this.options.timeout);
+
+        const timerId: number = typeof timer === "number"
+            ? timer
+            : this.timers.push(timer[Symbol.toPrimitive]());
+        this.logger.debug(`Sync timer started with id: ${timerId}`);
+        this.timers.push(timerId);
     }
 
     public killSync() {
+        this.logger.warn("Killing Sync");
         for (const t of this.timers) clearTimeout(t);
         this.timers = [];
     }

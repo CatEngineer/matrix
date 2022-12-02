@@ -131,8 +131,13 @@ export default class Client extends EventTarget {
         return true;
     }
 
+    public async destroy(): Promise<void> {
+        await this.logout();
+    }
+
     public async logout(): Promise<void> {
         await this.auth.logout();
+        this.sync.killSync();
     }
 
     public on<T extends keyof CustomEvents>(
