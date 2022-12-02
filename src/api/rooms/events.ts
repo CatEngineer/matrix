@@ -207,6 +207,16 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
         });
     }
 
+    public async sendMarkdown(message: string): Promise<string> {
+        return this.sendEvent("m.room.message", {
+            msgtype: "m.text",
+            format: "org.matrix.custom.html",
+            body: message,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            formatted_body: this.util.mdToHtml(message),
+        });
+    }
+
     /** @internal */
     // eslint-disable-next-line @typescript-eslint/naming-convention
     public fromJSON<T>(data: string): AnyEvent<T> {

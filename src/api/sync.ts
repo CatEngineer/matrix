@@ -53,7 +53,7 @@ export class SyncManager extends Manager<string, SyncEntity> {
 
     /** @internal */
     public sync(callback: (error?: Error, data?: SyncData) => void): void {
-        const timer = setInterval(async () => {
+        const doSync = async () => {
             // NOTE(dylhack): implicit object destruction to respect the inital
             //                next_batch passed to the constructor options.
             this.logger.debug(`Syncing since: ${this.options.since ?? "never"}`);
@@ -70,14 +70,17 @@ export class SyncManager extends Manager<string, SyncEntity> {
                 if (error instanceof Error) callback(error);
                 if (this.options.killOnError) this.killSync();
             }
+        };
 
-        }, this.options.timeout);
-
-        const timerId: number = typeof timer === "number"
-            ? timer
-            : this.timers.push(timer[Symbol.toPrimitive]());
-        this.logger.debug(`Sync timer started with id: ${timerId}`);
-        this.timers.push(timerId);
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        doSync().then(() => {
+            const timer = setInterval(doSync.bind(this), this.options.timeout);
+            const timerId: number = typeof timer === "number"
+                ? timer
+                : this.timers.push(timer[Symbol.toPrimitive]());
+            this.logger.debug(`Sync timer started with id: ${timerId}`);
+            this.timers.push(timerId);
+        });
     }
 
     public killSync() {

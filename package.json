@@ -40,7 +40,10 @@
     "typescript": ">=4.9",
     "xo": "^0.53.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/showdown": "^2.0.0",
+    "showdown": "^2.1.0"
+  },
   "engines": {
     "node": ">=v18.0.0"
   }
