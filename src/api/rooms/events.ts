@@ -5,7 +5,7 @@ import type { MxApi } from "../api.js";
 
 type AnyEvent<T> = Event<T> | StateEvent<T>;
 
-type Content<T> = T & Record<string, any>;
+type Content<T> = Exclude<T & Record<string, any>, any[]>;
 
 type EventConstructData = MxApi.ClientEventWithoutRoomID2;
 
@@ -172,7 +172,7 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
         await this.rest.redactEvent(this.room.id, id, txId, { reason });
     }
 
-    public async sendEvent<T>(type: string, content: T): Promise<string> {
+    public async sendEvent<T>(type: string, content: Content<T>): Promise<string> {
         const txId = this.util.getTxId();
         const resp = await this.rest.sendMessage(
             this.room.id,
@@ -186,7 +186,7 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
     public async setState<T>(
         type: string,
         stateKey = "",
-        content?: T
+        content?: Content<T>
     ): Promise<string> {
         const resp = await this.rest.setRoomStateWithKey(
             this.room.id,
