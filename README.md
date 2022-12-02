@@ -102,8 +102,8 @@ const room = await member.getDMs();
 // Syncing
 client.on('sync', (data) => {});
 
-// Events
-// 
+// Upon leaving a room all data will be given about that room 
+// as well as the last seen events
 client.on('room.leave', (leave) => {});
 
 // Every state event of every room you're currently in
