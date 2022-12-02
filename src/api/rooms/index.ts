@@ -77,7 +77,8 @@ export class RoomManager extends Manager<string, Room> {
                 const state = (data.state?.events || []).map(ev => {
                     return new MxStateEvent(room.events, ev);
                 });
-                this.client.dispatchEvent(new RoomLeaveEvent(roomId, {
+                this.client.dispatchEvent(new RoomLeaveEvent({
+                    roomId,
                     timeline, state,
                 }));
             });
@@ -90,4 +91,5 @@ export class RoomManager extends Manager<string, Room> {
     }
 }
 
+export * from "./events.js";
 export * from './members.js';

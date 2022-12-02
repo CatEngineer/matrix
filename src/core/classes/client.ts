@@ -24,12 +24,11 @@ import type {
     RoomLeaveEvent,
 } from "../internal/events.js";
 import {
-    type Log,
     SimpleCacheFactory,
     SimpleLoggerFactory,
     SimpleRestFactory,
 } from "../internal/index.js";
-import type { CustomEvent } from "./events.js";
+import type { CustomEvent } from "../internal/events.js";
 import Util from "./util.js";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -71,7 +70,7 @@ type CustomEvents = {
     "room.state": RoomStateEvent<any>["detail"];
     "room.event": RoomEvent<any>["detail"];
     "room.leave": RoomLeaveEvent["detail"];
-};
+} & Record<string, RoomSpecificEvent<any>["detail"]>;
 
 export default class Client extends EventTarget {
     public readonly rest: MxApi.MxHttpClient;
@@ -157,7 +156,6 @@ export default class Client extends EventTarget {
         this.sync.killSync();
     }
 
-    public on(type: string, listener: NodeListener<RoomSpecificEvent<any>["detail"]>): this;
     public on<T extends keyof CustomEvents>(
         type: T,
         listener: NodeListener<CustomEvents[T]>
@@ -170,7 +168,6 @@ export default class Client extends EventTarget {
         return this;
     }
 
-    public once(type: string, listener: NodeListener<RoomSpecificEvent<any>["detail"]>): this;
     public once<T extends keyof CustomEvents>(
         type: T,
         listener: NodeListener<CustomEvents[T]>
@@ -188,7 +185,6 @@ export default class Client extends EventTarget {
         return this;
     }
 
-    public addEventListener(type: string, listener: CustomListener<RoomSpecificEvent<any>>): void;
     public addEventListener<T extends keyof CustomEvents>(
         type: T,
         // eslint-disable-next-line @typescript-eslint/ban-types
