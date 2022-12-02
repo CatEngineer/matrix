@@ -10,11 +10,13 @@ import {
 
 /** @internal */
 class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCacheLayer<K, V> {
-    private readonly map: Map<K, V>;
 
-    constructor(manager: Manager<K, V>, holds: string) {
+    constructor(
+        private readonly map: Map<K, V>,
+        manager: Manager<K, V>, 
+        holds: string,
+    ) {
         super(manager, holds);
-        this.map = new Map();
     }
 
     public get(key: K): V | undefined {
@@ -69,10 +71,21 @@ class SimpleCacheLayer<K, V extends Entity<any>> extends SyncCacheLayer<K, V> {
 
 /** @internal */
 export class SimpleCacheFactory extends CacheFactory {
+    private readonly maps = new Map<string, Map<any, Entity<any>>>();
+
     public async getCacheLayer<K, V extends Entity<any>>(
         manager: Manager<K, V>,
         holds: string
     ): Promise<CacheLayer<K, V>> {
-        return new SimpleCacheLayer(manager, holds);
+        const map = this.getMap(holds);
+        return new SimpleCacheLayer(map, manager, holds);
+    }
+
+    private getMap(name: string): Map<any, any> {
+        const map = this.maps.get(name);
+        if (map) return map;
+        const freshMap = new Map();
+        this.maps.set(name, freshMap);
+        return freshMap;
     }
 }

@@ -110,8 +110,8 @@ export class StateEvent<T> extends Event<T> {
 }
 
 export class EventManager extends Manager<string, AnyEvent<any>> {
-    constructor(public readonly room: Room, holds: string) {
-        super(room.client, holds);
+    constructor(public readonly room: Room) {
+        super(room.client, "events");
     }
 
     public async getEvent<T>(id: string): Promise<AnyEvent<T>> {

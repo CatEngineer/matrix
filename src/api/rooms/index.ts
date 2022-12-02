@@ -17,7 +17,7 @@ export class Room extends Entity<RoomManager> {
     /** @internal */
     constructor(manager: RoomManager, data: RoomConstructData) {
         super(manager, data.id);
-        this.events = new EventManager(this, `${this.id}-events`);
+        this.events = new EventManager(this);
         this.members = new RoomMemberManager(this, `${this.id}-members`);
         this.data = data;
     }
