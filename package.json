@@ -27,6 +27,7 @@
   "author": "CatEngineer <contact@cat.engineer>",
   "license": "MIT",
   "devDependencies": {
+    "@types/showdown": "^2.0.0",
     "@typescript-eslint/eslint-plugin": ">=5.43.0",
     "@typescript-eslint/parser": ">=5.43.0",
     "eslint": ">=8.0.0",
@@ -41,7 +42,6 @@
     "xo": "^0.53.1"
   },
   "dependencies": {
-    "@types/showdown": "^2.0.0",
     "showdown": "^2.1.0"
   },
   "engines": {
