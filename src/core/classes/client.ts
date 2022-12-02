@@ -89,6 +89,10 @@ export default class Client extends EventTarget {
         this.rooms = new RoomManager(this, "room");
     }
 
+    public get userId() {
+        return this.auth.userId;
+    }
+
     public async login(token: string): Promise<boolean>;
     public async login(username: string, password: string): Promise<boolean>;
     public async login(
@@ -96,11 +100,10 @@ export default class Client extends EventTarget {
         password?: string
     ): Promise<boolean> {
         this.logger.debug('Starting client with options:', this.options);
-        let token: string;
-        if (password) {
-            const response = await this.auth.login(usernameOrToken, password);
-            token = response.access_token;
-        } else token = usernameOrToken;
+        const response = password 
+            ? await this.auth.login(usernameOrToken, password) 
+            : await this.auth.login(usernameOrToken);
+        const token = response.access_token;
 
         let init = true;
         this.options.restFactory.setToken(token);

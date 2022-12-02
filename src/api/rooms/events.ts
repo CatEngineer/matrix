@@ -11,6 +11,14 @@ type EventConstructData = MxApi.ClientEventWithoutRoomID2;
 
 type RoomState = MxApi.ClientEvent3;
 
+export type RoomMemberStateContent = {
+    membership?: string;
+    displayname?: string;
+    avatar_url?: string;
+};
+
+export type RoomMemberState = StateEvent<RoomMemberStateContent>;
+
 export class Event<T> extends Entity<EventManager> {
     /** @internal */
     public readonly data: EventConstructData;

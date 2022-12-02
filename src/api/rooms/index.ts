@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Entity, Manager } from "../../core/classes/index.js";
-import { EventManager, RoomMemberManager, type SyncData } from "../index.js";
+import { EventManager, RoomMemberManager, Self, type SyncData } from "../index.js";
 
 /** @internal */
 export type RoomConstructData = {
@@ -20,6 +20,10 @@ export class Room extends Entity<RoomManager> {
         this.events = new EventManager(this);
         this.members = new RoomMemberManager(this, `${this.id}-members`);
         this.data = data;
+    }
+
+    public async getSelf(): Promise<Self> {
+        return this.members.getSelf();
     }
 
     public toJSON() {

@@ -1,5 +1,6 @@
 import { Entity, Manager } from "../../core/index.js";
 import type { Room } from "../index.js";
+import type { RoomMemberState, RoomMemberStateContent } from "./events.js";
 
 /** @internal */
 export type RoomMemberConstructData = {
@@ -7,7 +8,7 @@ export type RoomMemberConstructData = {
     displayname?: string;
     avatar_url?: string;
     membership?: string;
-}
+};
 
 export class RoomMember extends Entity<RoomMemberManager> {
     public readonly room: Room;
@@ -40,7 +41,16 @@ export class RoomMember extends Entity<RoomMemberManager> {
 
     public async getAvatar(): Promise<Buffer | undefined> {
         if (!this.avatarUrl) return;
-        throw new Error('Not implemented');
+        throw new Error("Not implemented");
+    }
+
+    public async getState(): Promise<RoomMemberState> {
+        const room = await this.getRoom();
+        const state = await room.events.getState<RoomMemberStateContent>(
+            "m.room.member",
+            this.id
+        );
+        return state;
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -49,25 +59,59 @@ export class RoomMember extends Entity<RoomMemberManager> {
     }
 }
 
+export class Self extends RoomMember {
+    public async setDisplayName(displayname: string): Promise<void> {
+        await this.setState({ displayname });
+    }
+
+    public async setAvatarUrl(avatarUrl: string): Promise<void> {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        await this.setState({ avatar_url: avatarUrl });
+    }
+
+    public async setState(content: RoomMemberStateContent): Promise<void> {
+        const state = await this.getState();
+        const room = await this.getRoom();
+        await room.events.setState("m.room.member", this.id, {
+            ...state.content,
+            ...content,
+        });
+    }
+}
+
 export class RoomMemberManager extends Manager<string, RoomMember> {
-    constructor(
-        private readonly room: Room,
-        holds: string,
-    ) {
+    constructor(private readonly room: Room, holds: string) {
         super(room.client, holds);
     }
 
     public async getMember(memberId: string): Promise<RoomMember> {
-        const state = await this.room.events.getState('m.room.member', memberId);
+        const state = await this.room.events.getState(
+            "m.room.member",
+            memberId
+        );
         return new RoomMember(this.room, { ...state.content, id: memberId });
     }
 
     public async getMembers(limit = 100): Promise<RoomMember[]> {
-        const members = await this.room.events.getRoomState('m.room.member');
-        return members.map((member) => new RoomMember(
-            this.room, 
-            { ...member.content, id: member.stateKey },
-        ));
+        const members = await this.room.events.getRoomState("m.room.member");
+        return members.map(
+            (member) =>
+                new RoomMember(this.room, {
+                    ...member.content,
+                    id: member.stateKey,
+                })
+        );
+    }
+
+    public async getSelf(): Promise<Self> {
+        const state = await this.room.events.getState(
+            "m.room.member",
+            this.client.auth.userId
+        );
+        return new Self(this.room, {
+            ...state.content,
+            id: this.client.auth.userId,
+        });
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
