@@ -11,7 +11,17 @@ import type {
     LoggerFactory,
     CacheFactory,
 } from "../injectable/index.js";
-import { ErrorEvent, ReadyEvent, SyncEvent } from "../internal/events.js";
+import {
+    ErrorEvent,
+    ReadyEvent,
+    SyncEvent,
+} from "../internal/events.js";
+import type {
+    LogEvent,
+    RoomEvent,
+    RoomStateEvent,
+    RoomLeaveEvent,
+} from "../internal/events.js";
 import {
     type Log,
     SimpleCacheFactory,
@@ -53,11 +63,14 @@ type InternalOptions = {
 };
 
 type CustomEvents = {
-    "debug": Log ;
-    "sync": SyncData;
-    "error": Error;
-    "ready": undefined;
-}
+    debug: LogEvent<any>["detail"];
+    sync: SyncEvent["detail"];
+    error: ErrorEvent["detail"];
+    ready: ReadyEvent["detail"];
+    "room.state": RoomStateEvent<any>["detail"];
+    "room.event": RoomEvent<any>["detail"];
+    "room.leave": RoomLeaveEvent["detail"];
+};
 
 export default class Client extends EventTarget {
     public readonly rest: MxApi.MxHttpClient;
@@ -76,11 +89,11 @@ export default class Client extends EventTarget {
         this.options = this.buildOptions(homeserverUrl, options);
         this.rest = new MxApi.MxHttpClient(
             this.options.restFactory.homeserverUrl,
-            { 
+            {
                 fetch: this.options.restFactory.fetch.bind(
-                    this.options.restFactory,
+                    this.options.restFactory
                 ),
-            },
+            }
         );
 
         // Managers
@@ -99,9 +112,9 @@ export default class Client extends EventTarget {
         usernameOrToken: string,
         password?: string
     ): Promise<boolean> {
-        this.logger.debug('Starting client with options:', this.options);
-        const response = password 
-            ? await this.auth.login(usernameOrToken, password) 
+        this.logger.debug("Starting client with options:", this.options);
+        const response = password
+            ? await this.auth.login(usernameOrToken, password)
             : await this.auth.login(usernameOrToken);
         const token = response.access_token;
 
@@ -144,24 +157,27 @@ export default class Client extends EventTarget {
     }
 
     public on<T extends keyof CustomEvents>(
-        type: T, 
-        listener: NodeListener<CustomEvents[T]>,
+        type: T,
+        listener: NodeListener<CustomEvents[T]>
     ): this {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         this.addEventListener(type, (event: CustomEvent<CustomEvents[T]>) => {
             listener(event.detail);
-        })
+        });
         return this;
     }
 
-    public once<T extends keyof CustomEvents>(type: T, listener: NodeListener<CustomEvents[T]>): this {
+    public once<T extends keyof CustomEvents>(
+        type: T,
+        listener: NodeListener<CustomEvents[T]>
+    ): this {
         const onEvent = (event: CustomEvent<CustomEvents[T]>) => {
             listener(event.detail);
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
             this.removeEventListener(type, onEvent);
-        }
+        };
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
@@ -170,9 +186,9 @@ export default class Client extends EventTarget {
     }
 
     public addEventListener<T extends keyof CustomEvents>(
-        type: T, 
+        type: T,
         // eslint-disable-next-line @typescript-eslint/ban-types
-        listener: CustomListener<CustomEvents[T]> | null,
+        listener: CustomListener<CustomEvents[T]> | null
     ): void {
         super.addEventListener(type, listener);
     }
@@ -190,7 +206,10 @@ export default class Client extends EventTarget {
         return this.options.loggerFactory.getLogger("client");
     }
 
-    private buildOptions(hsUrl: string, options?: ClientOptions): InternalOptions {
+    private buildOptions(
+        hsUrl: string,
+        options?: ClientOptions
+    ): InternalOptions {
         return {
             cacheFactory: options?.cache ?? new SimpleCacheFactory(),
             loggerFactory: options?.logger ?? new SimpleLoggerFactory(this),
@@ -200,5 +219,4 @@ export default class Client extends EventTarget {
             botDisclosure: options?.botDisclosure ?? true,
         };
     }
-
 }

@@ -7,7 +7,8 @@ type ToString = {
     toString(): string;
 }
 
-class LogEvent<T extends ToString> extends CustomEvent<Log> {
+/** @internal */
+export class LogEvent<T extends ToString> extends CustomEvent<Log> {
     constructor(level: Levels, name: string, _arguments: T[]) {
         super('debug', { 
             detail: { 

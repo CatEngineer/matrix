@@ -1,7 +1,6 @@
 import showdown from 'showdown';
 
 export default class Util {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     private readonly mdConv: showdown.Converter = new showdown.Converter();
 
     public getTxId(): string {
@@ -9,8 +8,16 @@ export default class Util {
     }
 
     public mdToHtml(md: string): string {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
         return this.mdConv.makeHtml(md);
     }
 
+    public each<T>(record: Record<string, T> | undefined, callback: (value: T, key: string) => void): void {
+        if (!record) return;
+
+        const keys = Object.keys(record);
+        for (const key of keys) {
+            const value = record[key];
+            if (value) callback(value, key);
+        }
+    }
 }

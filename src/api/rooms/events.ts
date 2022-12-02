@@ -3,13 +3,11 @@ import { Entity, Manager } from "../../core/index.js";
 import type { Room, RoomMember } from "../../index.js";
 import type { MxApi } from "../api.js";
 
-type AnyEvent<T> = Event<T> | StateEvent<T>;
+type AnyMxEvent<T> = MxEvent<T> | MxStateEvent<T>;
 
 type Content<T> = Exclude<T & Record<string, any>, any[]>;
 
 type EventConstructData = MxApi.ClientEventWithoutRoomID2;
-
-type RoomState = MxApi.ClientEvent3;
 
 export type RoomMemberStateContent = {
     membership?: string;
@@ -17,9 +15,9 @@ export type RoomMemberStateContent = {
     avatar_url?: string;
 };
 
-export type RoomMemberState = StateEvent<RoomMemberStateContent>;
+export type RoomMemberState = MxStateEvent<RoomMemberStateContent>;
 
-export class Event<T> extends Entity<EventManager> {
+export class MxEvent<T> extends Entity<EventManager> {
     /** @internal */
     public readonly data: EventConstructData;
 
@@ -39,7 +37,7 @@ export class Event<T> extends Entity<EventManager> {
          * by the local homeserver, and is only returned if the event is a state event,
          * and the client has permission to see the previous content.
          */
-        previous?: Event<T>;
+        previous?: MxEvent<T>;
 
         /**
          * The event that redacted this event, if any.
@@ -68,7 +66,7 @@ export class Event<T> extends Entity<EventManager> {
             previous:
                 raw.unsigned?.prev_content === undefined
                     ? undefined
-                    : new Event(
+                    : new MxEvent(
                           manager,
                           raw.unsigned.prev_content as EventConstructData
                       ),
@@ -103,7 +101,7 @@ export class Event<T> extends Entity<EventManager> {
     }
 }
 
-export class StateEvent<T> extends Event<T> {
+export class MxStateEvent<T> extends MxEvent<T> {
     public readonly stateKey: string;
 
     /** @internal */
@@ -112,28 +110,28 @@ export class StateEvent<T> extends Event<T> {
         this.stateKey = raw.state_key ?? "";
     }
 
-    public async getReplaces(): Promise<StateEvent<T> | undefined> {
+    public async getReplaces(): Promise<MxStateEvent<T> | undefined> {
         const replaces = this.unsigned?.replaces_state;
         if (!replaces) return;
         const replacesId = replaces as string;
         const result = await this.manager.getEvent<T>(replacesId);
-        return result as StateEvent<T>;
+        return result as MxStateEvent<T>;
     }
 }
 
-export class EventManager extends Manager<string, AnyEvent<any>> {
+export class EventManager extends Manager<string, AnyMxEvent<any>> {
     constructor(public readonly room: Room) {
         super(room.client, "events");
     }
 
-    public async getEvent<T>(id: string): Promise<AnyEvent<T>> {
+    public async getEvent<T>(id: string): Promise<AnyMxEvent<T>> {
         const cached = await this.getCachedEvent(id);
-        if (cached) return cached as StateEvent<T>;
+        if (cached) return cached as MxStateEvent<T>;
 
         const resp = await this.rest.getOneRoomEvent(this.room.id, id);
         const result = resp.state_key
-            ? new StateEvent<T>(this, resp)
-            : new Event<T>(this, resp);
+            ? new MxStateEvent<T>(this, resp)
+            : new MxEvent<T>(this, resp);
 
         await this.cacheEvent(result);
         return result;
@@ -142,12 +140,12 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
     public async getState<T>(
         type: string,
         stateKey = ""
-    ): Promise<StateEvent<T>> {
+    ): Promise<MxStateEvent<T>> {
         const cached = await this.getCachedStateEvent(type, stateKey);
-        if (cached) return cached as StateEvent<T>;
+        if (cached) return cached as MxStateEvent<T>;
 
         const states = await this.getRoomState();
-        let result: StateEvent<T> | undefined;
+        let result: MxStateEvent<T> | undefined;
         for (const state of states) {
             if (state.data.type === type && state.stateKey === stateKey) {
                 result = state;
@@ -163,15 +161,15 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
         return result;
     }
 
-    public async getRoomState<T = any>(): Promise<Array<StateEvent<T>>>;
-    public async getRoomState<T>(type: string): Promise<Array<StateEvent<T>>>;
+    public async getRoomState<T = any>(): Promise<Array<MxStateEvent<T>>>;
+    public async getRoomState<T>(type: string): Promise<Array<MxStateEvent<T>>>;
     public async getRoomState<T = any>(
         type?: string
-    ): Promise<Array<StateEvent<T>>> {
+    ): Promise<Array<MxStateEvent<T>>> {
         // eslint-disable-next-line no-warning-comments
         // TODO(dylhack): cache this
         const resp = await this.rest.getRoomState(this.room.id);
-        const events = resp.map((data) => new StateEvent<any>(this, data));
+        const events = resp.map((data) => new MxStateEvent<any>(this, data));
         if (type) {
             return events.filter((event) => event.data.type === type);
         }
@@ -234,20 +232,20 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
 
     /** @internal */
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    public fromJSON<T>(data: string): AnyEvent<T> {
+    public fromJSON<T>(data: string): AnyMxEvent<T> {
         const raw = JSON.parse(data) as EventConstructData;
-        if (raw.state_key) return new StateEvent(this, raw);
-        return new Event(this, raw);
+        if (raw.state_key) return new MxStateEvent(this, raw);
+        return new MxEvent(this, raw);
     }
 
     /** @internal */
-    public async cacheEvent<T>(event: Event<T>): Promise<void> {
+    public async cacheEvent<T>(event: MxEvent<T>): Promise<void> {
         const cache = await this.getCache();
         await cache.set(event.id, event);
     }
 
     /** @internal */
-    public async cacheStateEvent<T>(event: StateEvent<T>): Promise<void> {
+    public async cacheStateEvent<T>(event: MxStateEvent<T>): Promise<void> {
         const cache = await this.getCache();
         await cache.set(`${event.type}:${event.stateKey}`, event);
     }
@@ -255,20 +253,20 @@ export class EventManager extends Manager<string, AnyEvent<any>> {
     private async getCachedStateEvent<T>(
         type: string,
         stateKey = ""
-    ): Promise<StateEvent<T> | undefined> {
+    ): Promise<MxStateEvent<T> | undefined> {
         const cache = await this.getCache();
         const key = `${type}:${stateKey}`;
         const cached = await cache.get(key);
-        if (cached) return cached as StateEvent<T>;
+        if (cached) return cached as MxStateEvent<T>;
         return undefined;
     }
 
-    private async getCachedEvent<T>(id: string): Promise<Event<T> | undefined> {
+    private async getCachedEvent<T>(id: string): Promise<MxEvent<T> | undefined> {
         const cache = await this.getCache();
         const cached = await cache.get(id);
-        if (cached) return cached as Event<T>;
+        if (cached) return cached as MxEvent<T>;
         return undefined;
     }
 }
 
-export class RedactedEvent extends Event<{ reason?: string }> {}
+export class RedactedEvent extends MxEvent<{ reason?: string }> {}
