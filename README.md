@@ -2,9 +2,9 @@
 A Matrix bot SDK for TypeScript.
 
 ```sh
-npm i @catengineering/matrix
-pnpm i @catengineering/matrix
-yarn add @catengineering/matrix
+npm i @catengineer/matrix
+pnpm i @catengineer/matrix
+yarn add @catengineer/matrix
 ```
 
 # Examples
@@ -26,7 +26,6 @@ await client.login('username', 'password');
 // or
 await client.login('token');
 ```
-
 
 ## Working with Rooms
 
@@ -57,7 +56,6 @@ const avatarUrl = await room.getAvatarUrl();
 await room.setAvatar('mxc://matrix.org/abc123');
 await room.setAvatar(/* Buffer */);
 await room.removeAvatar();
-
 
 // Inviting
 await room.members.invite('@bob:matrix.org');
@@ -103,7 +101,8 @@ const room = await member.getDMs();
 client.on('sync', (data) => {});
 
 // Events
-// 
+// Upon leaving a room all data will be given about that room 
+// as well as the last seen events
 client.on('room.leave', (leave) => {});
 
 // Every state event of every room you're currently in
