@@ -1,0 +1,12 @@
+node_modules/
+scripts/
+src/
+.env
+.env.example
+.eslintrc.json
+.gitignore
+.prettierrc
+README.md
+yarn.lock
+package-lock.json
+tscconfig.json
