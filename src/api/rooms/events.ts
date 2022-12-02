@@ -81,6 +81,10 @@ export class Event<T> extends Entity<EventManager> {
         return room.members.getMember(this.data.sender);
     }
 
+    public async redact(reason?: string): Promise<void> {
+        await this.manager.redact(this.id, reason);
+    }
+
     public getRoom(): Room {
         return this.manager.room;
     }
