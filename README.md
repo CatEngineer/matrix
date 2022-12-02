@@ -1,5 +1,17 @@
 
+A Matrix bot SDK for TypeScript.
+
+```sh
+npm i @catengineering/matrix
+pnpm i @catengineering/matrix
+yarn add @catengineering/matrix
+```
+
 # Examples
+
+The following are demonstrations of the various features of the library. Some
+features demonstrated may not exist just yet, they are referenced for what they
+will be.
 
 ## Client Initialization
 
@@ -56,6 +68,15 @@ await knock.approve();
 await knock.decline();
 ```
 
+## Working with Yourself
+
+```ts
+const room = await client.rooms.join('#matrix:matrix.org');
+const me = await room.getSelf();
+me.setDisplayName('New Display Name!');
+me.setAvatarUrl('mxc://matrix.org/abc123');
+```
+
 ## Working with Members
 
 ```ts
@@ -78,12 +99,21 @@ const room = await member.getDMs();
 ## Handling Events
 
 ```ts
-import { SyncData } from '@catengineer/matrix';
-
 // Syncing
-client.on('sync', (sync: SyncData) => {
+client.on('sync', (data) => {});
 
-});
+// Events
+// 
+client.on('room.leave', (leave) => {});
+
+// Every state event of every room you're currently in
+client.on('room.state', (state) => {});
+
+// Every event of every room you're currently in
+client.on('room.event', (event) => {});
+
+// Finally provide an event type you want to listen to
+client.on('m.room.member', (event) => {});
 
 // Internal Logging 
 client.on('debug', console.log);
