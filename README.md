@@ -1,5 +1,5 @@
 
-A Matrix bot SDK for TypeScript.
+A Matrix bot SDK for TypeScript. Come talk in the [Matrix room!](https://matrix.to/#/#catengineer-mx:arcticfoxes.net)
 
 ```sh
 npm i @catengineer/matrix
