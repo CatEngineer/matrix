@@ -1,6 +1,6 @@
 {
   "name": "@catengineer/matrix",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A Matrix Client-Server API Wrapper",
   "type": "module",
   "main": "lib/index.js",
