@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:/CatEngineer/matrix"
+    "url": "https://github.com/CatEngineer/matrix.git"
   },
   "keywords": [
     "matrix",
