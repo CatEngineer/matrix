@@ -46,7 +46,7 @@ export class SyncManager extends Manager<string, SyncEntity> {
         super(client, holds);
         this.options = {
             timeout: options.timeout ?? SyncManager.defaultPullTimeout,
-            killOnError: true,
+            killOnError: false,
             ...options,
         };
     }
