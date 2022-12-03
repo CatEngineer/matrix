@@ -1,8 +1,6 @@
 lib/
 typings/
 
-.env
-
 # Logs
 logs
 *.log
