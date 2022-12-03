@@ -1,8 +1,6 @@
 node_modules/
 scripts/
 src/
-.env
-.env.example
 .eslintrc.json
 .gitignore
 .prettierrc

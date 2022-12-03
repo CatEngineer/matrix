@@ -45,7 +45,7 @@ type NodeListener<T> = (data: T) => void;
  * @prop {CacheFactory?} cache Custom cache (default: SimpleCacheFactory)
  * @prop {LoggerFactory?} logger Custom logger (default: SimpleLoggerFactory)
  */
-type ClientOptions = {
+export type ClientOptions = {
     botDisclosure?: boolean;
     sync?: SyncOptions;
     rest?: RestFactory;
@@ -81,7 +81,6 @@ export default class Client extends EventTarget {
 
     public readonly rooms: RoomManager;
 
-    /** @internal */
     public readonly options: InternalOptions;
 
     constructor(homeserverUrl: string, options?: ClientOptions) {
