@@ -20,4 +20,16 @@ export default class Util {
             if (value) callback(value, key);
         }
     }
+
+    public isUserId(value: string): boolean {
+        return /^@.+:\w+\.\w+$/.test(value);
+    }
+
+    public isRoomId(value: string): boolean {
+        return /^(!|#).+:\w+\.\w+$/.test(value);
+    }
+
+    public isEventId(value: string): boolean {
+        return /^\$[\w-]+=\w+\.\w+$/.test(value);
+    }
 }
