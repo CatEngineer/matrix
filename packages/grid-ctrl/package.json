@@ -1,0 +1,28 @@
+{
+  "name": "@catengineer/grid-ctrl",
+  "author": "CatEngineer <contact@cat.engineer>",
+  "description": "Command framework for building Matrix bots",
+  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "type": "module",
+  "types": "./typings/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CatEngineer/grid-ctrl.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node ./lib/index.js"
+  },
+  "keywords": [
+    "matrix",
+    "bot",
+    "framework"
+  ],
+  "dependencies": {
+    "@catengineer/matrix": "0.2.0"
+  },
+  "devDependencies": {}
+}
